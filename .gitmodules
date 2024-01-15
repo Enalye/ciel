@@ -1,0 +1,3 @@
+[submodule "etabli"]
+	path = etabli
+	url = https://github.com/Enalye/etabli.git
