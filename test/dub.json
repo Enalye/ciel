@@ -1,0 +1,12 @@
+{
+    "name": "test",
+    "targetType": "executable",
+    "dependencies": {
+        "ciel": {
+            "path": "..",
+            "version": "~master"
+        }
+    },
+    "targetPath": "../bin",
+    "workingDirectory": "../bin"
+}
