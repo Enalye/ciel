@@ -5,85 +5,70 @@
  */
 module ciel.theme;
 
+import std.exception : enforce;
 import etabli;
 
-struct ThemeData {
-    Color background;
-    Color surface;
-    Color onSurface;
-    Color primary;
-    Color primaryContainer;
-    Color onPrimary;
-    Color neutral;
-}
-
 private {
-    ThemeData[] _themes;
+    int[] _teinteMenthe = [
+        0x009343, 0x00b55a, 0x00c866, 0x00dc75, 0x00ee81, 0x00f494, 0x00fba6,
+        0x77febf, 0xb5fed8, 0xe1fff0
+    ];
+
+    int[] teinteCiel = [
+        0x008784, 0x00acb2, 0x00c1cb, 0x00d8e7, 0x00eafc, 0x00effb, 0x29f5fe,
+        0x77fafe, 0xb2fbfd, 0xe0fefe
+    ];
+
+    int[] teinteRose = [
+        0x8a0052, 0xb10058, 0xc7005b, 0xde0060, 0xef0062, 0xf3007c, 0xfa3096,
+        0xfe77b6, 0xfeb0d4, 0xfeb0d4, 0xffe0ee
+    ];
+
+    int[] teinteVert = [
+        0x009315, 0x00b823, 0x00cd2b, 0x00e434, 0x00f63d, 0x3efb57, 0x77fe7c,
+        0xa7ffa5, 0xccffca, 0xebffea
+    ];
 }
 
-void initThemes() {
-    ThemeData defaultTheme = {
-        background: Color.fromHex(0xa5d4ad), //
-        surface: Color.fromHex(0xffffff), //
-        onSurface: Color.fromHex(0x000000), //
-        primary: Color.fromHex(0xa5d4ad), //
-        primaryContainer: Color.fromHex(0x00baaa), //
-        onPrimary: Color.fromHex(0x000000), //
-        neutral: Color.fromHex(0xcecece)
-    };
+final class Theme {
+    enum Mode {
+        light,
+        dark
+    }
 
-    /*ThemeData purpleTheme = {
-        primary = Color.fromHex(0x6750A4);
-        outline = Color.fromHex(0x79747E);
-        onPrimary = Color.fromHex(0xFFFFFF);
-        onSurface = Color.fromHex(0x1C1B1F);
-    };*/
+    private {
+        Mode _mode = Mode.light;
+        Color[string] _colors;
+        Font[string] _fonts;
+    }
 
-    _themes = [defaultTheme];
-}
+    @property {
+        Mode mode() const {
+            return _mode;
+        }
+    }
 
-enum ThemeKey {
-    background,
-    surface,
-    onSurface,
-    primary,
-    primaryContainer,
-    onPrimary,
-    neutral
-}
+    Color getColor(string key) const {
+        auto p = key in _colors;
+        enforce(p, "couleur non-définie");
+        return *p;
+    }
 
-int getThemesCount() {
-    return cast(int) _themes.length;
-}
+    Font getFont(string key) const {
+        auto p = key in _fonts;
+        enforce(p, "police non-définie");
+        return cast(Font) *p;
+    }
 
-private int getThemeId() {
-    return 0;
-}
+    void setMode(Mode mode_) {
+        _mode = mode_;
+    }
 
-Color getTheme(ThemeKey type) {
-    int themeId = getThemeId();
-    if (themeId >= _themes.length)
-        themeId = 0;
+    void setColor(string key, Color color) {
+        _colors[key] = color;
+    }
 
-    if (!_themes.length)
-        return Color.white;
-
-    ThemeData currentTheme = _themes[themeId];
-
-    final switch (type) with (ThemeKey) {
-    case background:
-        return currentTheme.background;
-    case surface:
-        return currentTheme.surface;
-    case onSurface:
-        return currentTheme.onSurface;
-    case primary:
-        return currentTheme.primary;
-    case primaryContainer:
-        return currentTheme.primaryContainer;
-    case onPrimary:
-        return currentTheme.onPrimary;
-    case neutral:
-        return currentTheme.neutral;
+    void setFont(string key, Font font) {
+        _fonts[key] = font;
     }
 }

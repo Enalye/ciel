@@ -9,6 +9,7 @@ public import etabli;
 
 public {
     import ciel.button;
+    import ciel.panel;
     import ciel.slider;
-    import ciel.theme;
+    import ciel.window;
 }

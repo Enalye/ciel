@@ -6,7 +6,7 @@
 module ciel.button.fx;
 
 import etabli;
-import ciel.theme;
+import ciel.window;
 
 final class RippleEffect {
     private {
@@ -28,7 +28,7 @@ final class RippleEffect {
         bool _isPressed;
     }
 
-    Color color;
+    Color _color;
 
     this(float radius_) {
         _radius = radius_ * 2f;
@@ -110,7 +110,7 @@ final class RippleEffect {
     }
 
     void draw() {
-        _circle.color = color;
+        _circle.color = _color;
 
         foreach (ripple; _ripples) {
             _circle.radius = ripple.radius;
@@ -129,17 +129,13 @@ final class RippleEffect {
 final class ButtonFx {
     private {
         UIElement _element;
-        float _alpha = 0f, _targetAlpha = 0f;
-        RoundedRectangle _background, _mask;
+        RoundedRectangle _mask;
         RippleEffect _rippleEffect;
+        Color _color;
     }
-
-    Color color;
 
     this(UIElement element) {
         _element = element;
-        _background = new RoundedRectangle(_element.getSize(), 8f, true, 0f);
-        _background.anchor = Vec2f.zero;
 
         _mask = new RoundedRectangle(_element.getSize(), 8f, true, 0f);
         _mask.anchor = Vec2f.zero;
@@ -148,46 +144,29 @@ final class ButtonFx {
         _rippleEffect = new RippleEffect(_element.getSize().x);
     }
 
+    void setColor(Color rgb) {
+        HSLColor hsl = HSLColor.fromColor(rgb);
+        hsl.s = hsl.s * 1.1f;
+        hsl.l = hsl.l * 0.9f;
+        _color = hsl.toColor();
+    }
+
     void update() {
-        _targetAlpha = 0f;
-
-        if (!_element.isEnabled) {
-            _alpha = 0f;
-            return;
-        }
-
-        if (_element.isGrabbed) {
-            _targetAlpha += 0.16f * 5f;
-        }
-        else if (_element.isGrabbed || _element.hasFocus) {
-            _targetAlpha += 0.12f * 5f;
-        }
-        else if (_element.isHovered) {
-            _targetAlpha += 0.08f * 5f;
-        }
-
-        _alpha = approach(_alpha, _targetAlpha, .1f);
-
         _rippleEffect.update();
     }
 
     void draw() {
-        _background.blend = Blend.alpha;
-        _background.color = color;
-        _background.alpha = _alpha;
-        _background.draw(Vec2f.zero);
-
         Etabli.renderer.pushCanvas(cast(int) _element.getSize().x, cast(int) _element.getSize().y);
 
-        _rippleEffect.color = Color.fromHex(0xff0000);
+        _rippleEffect._color = Color.fromHex(0xffffff);
         _rippleEffect.draw();
-        _background.blend = Blend.mask;
-        _background.color = Color.white;
-        _background.alpha = 1f;
-        _background.draw(Vec2f.zero);
+        _mask.blend = Blend.mask;
+        _mask.color = _color;
+        _mask.alpha = 1f;
+        _mask.draw(Vec2f.zero);
 
         Etabli.renderer.popCanvasAndDraw(Vec2f.zero, _element.getSize(), 0f,
-            Vec2f.zero, color, 1f);
+            Vec2f.zero, _color, 1f);
     }
 
     void onClick(Vec2f position) {

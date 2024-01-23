@@ -9,17 +9,42 @@ import ciel;
 
 void main() {
     try {
-        Etabli et = new Etabli(800, 600);
-        initThemes();
+        Ciel app = new Ciel(800, 600);
+/*
+        auto surface = new Surface;
+        surface.setSize(Vec2f(800, 200));
+        surface.setAlign(UIAlignX.center, UIAlignY.top);
+        app.addElement(surface);
+
+        auto container = new Container;
+        container.setSize(Vec2f(800, 50));
+        container.setAlign(UIAlignX.center, UIAlignY.top);
+        app.addElement(container);*/
 
         auto vbox = new VBox;
         vbox.setAlign(UIAlignX.left, UIAlignY.top);
         vbox.setSpacing(8f);
         vbox.setPosition(Vec2f(10f, 10f));
-        et.ui.add(vbox);
+        app.addElement(vbox);
 
         {
-            auto btn = new FilledButton("Primary");
+            auto btn = new PrimaryButton("Primary");
+            vbox.addElement(btn);
+            /*btn.addEventListener("mousedown", {
+                writeln("DOWN");
+            });
+            btn.addEventListener("mouseup", {
+                writeln("UP");
+            });
+            btn.addEventListener("press", {
+                writeln("PRESS");
+            });
+            btn.addEventListener("unpress", {
+                writeln("UNPRESS");
+            });*/
+        }
+        {
+            auto btn = new SecondaryButton("Secondary");
             vbox.addElement(btn);
         }
         {
@@ -27,7 +52,7 @@ void main() {
             vbox.addElement(btn);
         }
         {
-            auto btn = new TextButton("Text");
+            auto btn = new GhostButton("Text");
             vbox.addElement(btn);
         }
         {
@@ -37,7 +62,7 @@ void main() {
             slider.steps = 2;
             slider.ivalue = 100;
             slider.setPosition(Vec2f(0f, 200f));
-            et.ui.add(slider);
+            app.addElement(slider);
 
             auto slider2 = new VSlider();
             slider2.minValue = 0;
@@ -45,12 +70,12 @@ void main() {
             slider2.steps = 200;
             slider2.ivalue = 100;
             slider2.setPosition(Vec2f(200f, 0f));
-            et.ui.add(slider2);
+            app.addElement(slider2);
 
-            slider.addEventListener("value", { writeln(slider.value01); });
+            //slider.addEventListener("value", { writeln(slider.value01); });
         }
 
-        et.run();
+        app.run();
 
         /*createApplication(Vec2i(1280, 300));
 
@@ -69,7 +94,7 @@ void main() {
         auto b = new Text("« Portez ce vieux whisky au juge blond qui fume sur son île intérieure,
 à côté de l'alcôve ovoïde, où les bûches se consument dans l'âtre,
 ce qui lui permet de penser à la cænogénèse de l'être dont il est{fx:shake} question dans la cause ambiguë entendue à Moÿ,
-dans un capharnaüm qui, pense-t-il, diminue çà et là la qualité de son œuvre. »");
+dans un capharnaüm qui, pense-t-il, diminue çà app là la qualité de son œuvre. »");
         b.position = Vec2f(0f, 100f);
         b.cps = 60;
         appendRoot(b);*/

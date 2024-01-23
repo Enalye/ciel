@@ -6,7 +6,7 @@
 module ciel.slider.vslider;
 
 import etabli;
-import ciel.theme;
+import ciel.window;
 
 /// Réglette horizontale
 final class VSlider : Slider {
@@ -22,7 +22,7 @@ final class VSlider : Slider {
         setSize(Vec2f(32f, 200f));
 
         _backgroundBar = new Rectangle(Vec2f(scrollLength, 2f), true, 1f);
-        _backgroundBar.color = getTheme(ThemeKey.neutral);
+        _backgroundBar.color = Ciel.theme.getColor("neutral");
         _backgroundBar.angle = scrollAngle;
         addImage(_backgroundBar);
 
@@ -30,17 +30,17 @@ final class VSlider : Slider {
         _progressBar.anchor = Vec2f(0f, .5f);
         _progressBar.pivot = Vec2f(0f, .5f);
         _progressBar.angle = scrollAngle;
-        _progressBar.color = getTheme(ThemeKey.primary);
+        _progressBar.color = Ciel.theme.getColor("secondary");
         addImage(_progressBar);
 
-        _circle = new Circle(16f, true, 0f);
-        _circle.color = getTheme(ThemeKey.primary);
-        addImage(_circle);
-
         _hoverCircle = new Circle(16f, true, 0f);
-        _hoverCircle.color = getTheme(ThemeKey.primary);
+        _hoverCircle.color = Ciel.theme.getColor("secondary");
         _hoverCircle.alpha = 0f;
         addImage(_hoverCircle);
+
+        _circle = new Circle(16f, true, 0f);
+        _circle.color = Ciel.theme.getColor("primary");
+        addImage(_circle);
 
         addEventListener("size", &_onSizeChange);
         addEventListener("value", &_onValueChange);
