@@ -20,9 +20,10 @@ final class OutlinedButton : Button {
         setFxColor(Ciel.getAccent());
         setTextColor(Ciel.getAccent());
 
-        _background = new RoundedRectangle(getSize(), 8f, false, 2f);
+        _background = RoundedRectangle.outline(getSize(), Ciel.getCorner(), 2f);
         _background.color = Ciel.getAccent();
         _background.anchor = Vec2f.zero;
+        _background.thickness = 2f;
         addImage(_background);
 
         addEventListener("mouseenter", {

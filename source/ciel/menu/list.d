@@ -37,12 +37,12 @@ final class MenuList : UIElement {
         _name = name_;
         setAlign(UIAlignX.left, UIAlignY.top);
 
-        _background = new RoundedRectangle(getSize(), 5f, true, 1f);
+        _background = RoundedRectangle.fill(getSize(), Ciel.getCorner());
         _background.color = Ciel.getForeground();
         _background.anchor = Vec2f.zero;
         addImage(_background);
 
-        _outline = new RoundedRectangle(getSize(), 5f, false, 1f);
+        _outline = RoundedRectangle.outline(getSize(), Ciel.getCorner(), 1f);
         _outline.color = Ciel.getNeutral();
         _outline.anchor = Vec2f.zero;
         addImage(_outline);

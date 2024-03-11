@@ -20,7 +20,7 @@ final class DangerButton : Button {
         setFxColor(Ciel.getDanger());
         setTextColor(Ciel.getOnDanger());
 
-        _background = new RoundedRectangle(getSize(), 8f, true, 0f);
+        _background = RoundedRectangle.fill(getSize(), Ciel.getCorner());
         _background.color = Ciel.getDanger();
         _background.anchor = Vec2f.zero;
         addImage(_background);
@@ -31,8 +31,6 @@ final class DangerButton : Button {
             hsl.l = hsl.l * .8f;
             _background.color = hsl.toColor();
         });
-        addEventListener("mouseleave", {
-            _background.color = Ciel.getDanger();
-        });
+        addEventListener("mouseleave", { _background.color = Ciel.getDanger(); });
     }
 }

@@ -137,7 +137,7 @@ final class ButtonFx {
     this(UIElement element) {
         _element = element;
 
-        _mask = new RoundedRectangle(_element.getSize(), 8f, true, 0f);
+        _mask = RoundedRectangle.fill(_element.getSize(), Ciel.getCorner());
         _mask.anchor = Vec2f.zero;
         _mask.blend = Blend.mask;
 
@@ -156,7 +156,8 @@ final class ButtonFx {
     }
 
     void draw() {
-        Etabli.renderer.pushCanvas(cast(int) _element.getWidth(), cast(int) _element.getHeight(), Blend.additive);
+        Etabli.renderer.pushCanvas(cast(int) _element.getWidth(),
+            cast(int) _element.getHeight(), Blend.additive);
 
         _rippleEffect._color = Color.fromHex(0xffffff);
         _rippleEffect.draw();

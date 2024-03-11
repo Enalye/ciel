@@ -26,7 +26,7 @@ final class MenuButton : Button {
         setFxColor(Ciel.getNeutral());
         setTextColor(Ciel.getOnNeutral());
 
-        _background = new RoundedRectangle(getSize(), 8f, true, 2f);
+        _background = RoundedRectangle.fill(getSize(), Ciel.getCorner());
         _background.color = Ciel.getNeutral();
         _background.anchor = Vec2f.zero;
         _background.alpha = .5f;

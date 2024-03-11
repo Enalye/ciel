@@ -9,7 +9,7 @@ import etabli;
 
 import ciel.window;
 
-final class Container : UIElement {
+class Container : UIElement {
     private {
         Rectangle _background;
     }

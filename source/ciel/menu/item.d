@@ -29,7 +29,7 @@ final class MenuItem : Button {
         setPadding(Vec2f(48f, 8f));
         setTextAlign(UIAlignX.left, 16f);
 
-        _background = new RoundedRectangle(getSize(), 8f, true, 2f);
+        _background = RoundedRectangle.fill(getSize(), Ciel.getCorner());
         _background.color = Ciel.getAccent();
         _background.anchor = Vec2f.zero;
         _background.alpha = 1f;

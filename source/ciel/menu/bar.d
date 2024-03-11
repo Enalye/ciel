@@ -26,7 +26,7 @@ class MenuBar : UIElement {
     this() {
         setAlign(UIAlignX.left, UIAlignY.top);
 
-        setSize(Vec2f(Ciel.window.width, _barHeight));
+        setSize(Vec2f(Ciel.width, _barHeight));
 
         _container = new Container;
         addUI(_container);
@@ -35,13 +35,6 @@ class MenuBar : UIElement {
         _box.setAlign(UIAlignX.left, UIAlignY.center);
         _box.setMargin(Vec2f(8f, 4f));
         addUI(_box);
-
-        foreach (id, key; ["Fichier", "Édition", "Projet", "Affichage"]) {
-            add(key, "sosis");
-            add(key, "chocolaté");
-            addSeparator(key);
-            add(key, "camembert");
-        }
 
         addEventListener("register", &_onSize);
         addEventListener("parentSize", &_onSize);
@@ -84,7 +77,7 @@ class MenuBar : UIElement {
             setSize(Vec2f(parent.getWidth(), _barHeight));
         }
         else {
-            setSize(Vec2f(Ciel.window.width, _barHeight));
+            setSize(Vec2f(Ciel.width, _barHeight));
         }
     }
 

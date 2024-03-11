@@ -20,6 +20,7 @@ struct Theme {
     Color onNeutral;
     Color onAccent;
     Color onDanger;
+    float corner;
 }
 
 final class Ciel {
@@ -74,8 +75,20 @@ final class Ciel {
             return _theme.onDanger;
         }
 
-        Window window() {
-            return _etabli.window;
+        float getCorner() {
+            return _theme.corner;
+        }
+
+        Vec2f size() {
+            return cast(Vec2f) Etabli.window.size();
+        }
+
+        float width() {
+            return Etabli.window.width();
+        }
+
+        float height() {
+            return Etabli.window.height();
         }
 
         void addUI(UIElement element) {

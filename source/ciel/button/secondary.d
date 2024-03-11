@@ -20,7 +20,7 @@ final class SecondaryButton : Button {
         setFxColor(Ciel.getNeutral());
         setTextColor(Ciel.getOnNeutral());
 
-        _background = new RoundedRectangle(getSize(), 8f, true, 0f);
+        _background = RoundedRectangle.fill(getSize(), Ciel.getCorner());
         _background.color = Ciel.getNeutral();
         _background.anchor = Vec2f.zero;
         addImage(_background);

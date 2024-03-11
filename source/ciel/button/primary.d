@@ -20,7 +20,7 @@ final class PrimaryButton : Button {
         setFxColor(Ciel.getAccent());
         setTextColor(Ciel.getOnAccent());
 
-        _background = new RoundedRectangle(getSize(), 8f, true, 0f);
+        _background = RoundedRectangle.fill(getSize(), Ciel.getCorner());
         _background.color = Ciel.getAccent();
         _background.anchor = Vec2f.zero;
         addImage(_background);
@@ -31,8 +31,6 @@ final class PrimaryButton : Button {
             hsl.l = hsl.l * .8f;
             _background.color = hsl.toColor();
         });
-        addEventListener("mouseleave", {
-            _background.color = Ciel.getAccent();
-        });
+        addEventListener("mouseleave", { _background.color = Ciel.getAccent(); });
     }
 }
