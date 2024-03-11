@@ -16,7 +16,7 @@ final class Container : UIElement {
 
     this() {
         _background = new Rectangle(getSize(), true, 1f);
-        _background.color = Ciel.theme.getColor("container");
+        _background.color = Ciel.getContainer();
         _background.anchor = Vec2f.zero;
         addImage(_background);
 

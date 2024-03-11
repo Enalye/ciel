@@ -13,15 +13,15 @@ abstract class Button : UIElement {
     private {
         Vec2f _padding = Vec2f(24f, 8f);
         ButtonFx _fx;
-        Label _text;
+        Label _label;
     }
 
     this(string text_) {
-        _text = new Label(text_, Ciel.theme.getFont("button"));
-        _text.color = Ciel.theme.getColor("primary");
-        addElement(_text);
+        _label = new Label(text_, Ciel.getFont());
+        _label.color = Ciel.getOnNeutral();
+        addUI(_label);
 
-        setSize(_text.getSize() + _padding);
+        setSize(_label.getSize() + _padding);
 
         _fx = new ButtonFx(this);
 
@@ -40,16 +40,24 @@ abstract class Button : UIElement {
 
     final void setPadding(Vec2f padding) {
         _padding = padding;
-        setSize(_text.getSize() + _padding);
+        setSize(_label.getSize() + _padding);
     }
 
     void setText(string text_) {
-        _text.text = text_;
-        setSize(_text.getSize() + _padding);
+        _label.text = text_;
+        setSize(_label.getSize() + _padding);
     }
 
-    void setButtonColors(Color fxColor, Color textColor) {
-        _fx.setColor(fxColor);
-        _text.color = textColor;
+    void setTextAlign(UIAlignX alignX, float offset = 0f) {
+        _label.setAlign(alignX, UIAlignY.center);
+        _label.setPosition(Vec2f(offset, 0f));
+    }
+
+    void setTextColor(Color color) {
+        _label.color = color;
+    }
+
+    void setFxColor(Color color) {
+        _fx.setColor(color);
     }
 }

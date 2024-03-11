@@ -7,72 +7,95 @@ module ciel.window;
 
 import std.exception : enforce;
 import etabli;
-import ciel.theme;
+
+struct Theme {
+    Font font;
+    Color background;
+    Color surface;
+    Color container;
+    Color foreground;
+    Color neutral;
+    Color accent;
+    Color danger;
+    Color onNeutral;
+    Color onAccent;
+    Color onDanger;
+}
 
 final class Ciel {
-    private {
-        Etabli _etabli;
-    }
-
     private static {
         bool _isInstanciated;
+        Etabli _etabli;
         Theme _theme;
     }
 
     static {
-        void setTheme(Theme theme) {
-            _theme = theme;
-            _etabli.ui.dispatchEvent("theme");
-            _etabli.renderer.color = _theme.getColor("background");
+        Font getFont() {
+            return _theme.font;
         }
 
-        const(Theme) theme() {
-            return _theme;
+        Color getBackground() {
+            return _theme.background;
         }
 
-        void addElement(UIElement element) {
-            _etabli.ui.addElement(element);
+        Color getSurface() {
+            return _theme.surface;
         }
 
-        void clearElements() {
-            _etabli.ui.clearElements();
+        Color getContainer() {
+            return _theme.container;
+        }
+
+        Color getForeground() {
+            return _theme.foreground;
+        }
+
+        Color getNeutral() {
+            return _theme.neutral;
+        }
+
+        Color getAccent() {
+            return _theme.accent;
+        }
+
+        Color getDanger() {
+            return _theme.danger;
+        }
+
+        Color getOnNeutral() {
+            return _theme.onNeutral;
+        }
+
+        Color getOnAccent() {
+            return _theme.onAccent;
+        }
+
+        Color getOnDanger() {
+            return _theme.onDanger;
+        }
+
+        Window window() {
+            return _etabli.window;
+        }
+
+        void addUI(UIElement element) {
+            _etabli.ui.addUI(element);
+        }
+
+        void clearUI() {
+            _etabli.ui.clearUI();
         }
     }
 
-    /// Ctor
-    this(uint windowWidth, uint windowHeight, string windowTitle = "Ciel") {
+    /// Init
+    this(uint windowWidth, uint windowHeight, Theme delegate() themeFunc, string windowTitle = "Ciel") {
         enforce(!_isInstanciated, "une seule instance de Ciel peut exister");
         _isInstanciated = true;
 
         _etabli = new Etabli(windowWidth, windowHeight, windowTitle);
-        _initThemes();
-    }
 
-    private void _initThemes() {
-        Theme defaultTheme = new Theme;
-        defaultTheme.setMode(Theme.Mode.light);
-
-        defaultTheme.setColor("background", Color.fromHex(0xf6fcfe));
-        defaultTheme.setColor("surface", Color.fromHex(0xcdedfa));
-        defaultTheme.setColor("container", Color.fromHex(0x77b5fe));
-        defaultTheme.setColor("primary", Color.fromHex(0x0077b6));
-        defaultTheme.setColor("secondary", Color.fromHex(0x00b4d8));
-        defaultTheme.setColor("neutral", Color.fromHex(0xaec2cb));
-        defaultTheme.setColor("danger", Color.fromHex(0xf6b9c5));
-        defaultTheme.setColor("onBackground", Color.fromHex(0x002263));
-        defaultTheme.setColor("onSurface", Color.fromHex(0x002263));
-        defaultTheme.setColor("onContainer", Color.fromHex(0x002263));
-        defaultTheme.setColor("onPrimary", Color.fromHex(0xe2f8ff));
-        defaultTheme.setColor("onSecondary", Color.fromHex(0xe2f8ff));
-        defaultTheme.setColor("onNeutral", Color.fromHex(0x2c3134));
-        defaultTheme.setColor("onDanger", Color.fromHex(0xd72b4d));
-
-        defaultTheme.setFont("button", new TrueTypeFont(
-            veraFontData, 24
-        ));
-
-        _theme = defaultTheme;
-        _etabli.renderer.color = _theme.getColor("background");
+        _theme = themeFunc();
+        _etabli.renderer.color = _theme.background;
     }
 
     void run() {

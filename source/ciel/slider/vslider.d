@@ -22,7 +22,7 @@ final class VSlider : Slider {
         setSize(Vec2f(32f, 200f));
 
         _backgroundBar = new Rectangle(Vec2f(scrollLength, 2f), true, 1f);
-        _backgroundBar.color = Ciel.theme.getColor("neutral");
+        _backgroundBar.color = Ciel.getNeutral();
         _backgroundBar.angle = scrollAngle;
         addImage(_backgroundBar);
 
@@ -30,16 +30,16 @@ final class VSlider : Slider {
         _progressBar.anchor = Vec2f(0f, .5f);
         _progressBar.pivot = Vec2f(0f, .5f);
         _progressBar.angle = scrollAngle;
-        _progressBar.color = Ciel.theme.getColor("secondary");
+        _progressBar.color = Ciel.getAccent();
         addImage(_progressBar);
 
         _hoverCircle = new Circle(16f, true, 0f);
-        _hoverCircle.color = Ciel.theme.getColor("secondary");
+        _hoverCircle.color = Ciel.getAccent();
         _hoverCircle.alpha = 0f;
         addImage(_hoverCircle);
 
         _circle = new Circle(16f, true, 0f);
-        _circle.color = Ciel.theme.getColor("primary");
+        _circle.color = Ciel.getAccent();
         addImage(_circle);
 
         addEventListener("size", &_onSizeChange);

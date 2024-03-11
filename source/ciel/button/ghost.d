@@ -17,10 +17,11 @@ final class GhostButton : Button {
     this(string text_) {
         super(text_);
 
-        setButtonColors(Ciel.theme.getColor("primary"), Ciel.theme.getColor("primary"));
+        setFxColor(Ciel.getNeutral());
+        setTextColor(Ciel.getAccent());
 
         _background = new RoundedRectangle(getSize(), 8f, true, 2f);
-        _background.color = Ciel.theme.getColor("primary");
+        _background.color = Ciel.getNeutral();
         _background.anchor = Vec2f.zero;
         _background.alpha = .5f;
         _background.isEnabled = false;

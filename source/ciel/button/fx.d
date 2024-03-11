@@ -156,7 +156,7 @@ final class ButtonFx {
     }
 
     void draw() {
-        Etabli.renderer.pushCanvas(cast(int) _element.getSize().x, cast(int) _element.getSize().y);
+        Etabli.renderer.pushCanvas(cast(int) _element.getWidth(), cast(int) _element.getHeight(), Blend.additive);
 
         _rippleEffect._color = Color.fromHex(0xffffff);
         _rippleEffect.draw();

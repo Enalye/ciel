@@ -16,7 +16,7 @@ final class Surface : UIElement {
 
     this() {
         _background = new Rectangle(getSize(), true, 1f);
-        _background.color = Ciel.theme.getColor("surface");
+        _background.color = Ciel.getSurface();
         _background.anchor = Vec2f.zero;
         addImage(_background);
 
