@@ -1,0 +1,408 @@
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
+module ciel.input.textfield;
+
+import std.ascii;
+import std.math : abs;
+import std.conv : to;
+import std.string : indexOf;
+import std.utf;
+import etabli;
+import ciel.window;
+
+final class TextField : UIElement {
+    private {
+        RoundedRectangle _background, _outline;
+        Rectangle _caret, _selection;
+        Label _label;
+        dstring _text, _allowedCharacters;
+        uint _caretIndex = 0U, _selectionIndex = 0u;
+        Timer _timer;
+        uint _limit = 80u;
+        float _caretAlpha = 1f; //suppr
+    }
+
+    @property {
+        string text() const {
+            return to!string(_text);
+        }
+
+        string text(string text_) {
+            _text = to!dstring(text_);
+            _caretIndex = to!uint(_text.length);
+            _selectionIndex = _caretIndex;
+            _label.text = text_;
+            return text_;
+        }
+
+        uint limit() const {
+            return _limit;
+        }
+
+        uint limit(uint newLimit) {
+            _limit = newLimit;
+            if (_text.length > _limit) {
+                _text.length = _limit;
+                _label.text = to!string(_text);
+            }
+            if (_caretIndex > _limit)
+                _caretIndex = _limit;
+            return _limit;
+        }
+    }
+
+    this() {
+        setSize(Vec2f(150f, 25f));
+        focusable = true;
+
+        _background = RoundedRectangle.fill(getSize(), Ciel.getCorner());
+        _background.anchor = Vec2f.zero;
+        _background.color = Ciel.getBackground();
+        addImage(_background);
+
+        _outline = RoundedRectangle.outline(getSize(), Ciel.getCorner(), 2f);
+        _outline.anchor = Vec2f.zero;
+        _outline.color = Ciel.getNeutral();
+        addImage(_outline);
+
+        _selection = Rectangle.fill(Vec2f(2f, Ciel.getFont().size()));
+        _selection.anchor = Vec2f(0f, 0.5f);
+        _selection.color = Ciel.getAccent();
+        _selection.alpha = 0.5f;
+        _selection.isEnabled = false;
+        addImage(_selection);
+
+        _caret = Rectangle.fill(Vec2f(2f, Ciel.getFont().size()));
+        _caret.anchor = Vec2f.half;
+        _caret.color = Ciel.getNeutral();
+        _caret.isEnabled = false;
+        _caret.alpha = 0f;
+        addImage(_caret);
+
+        _caretAlpha = 1f;
+        _timer.mode = Timer.Mode.bounce;
+        _timer.start(60);
+
+        _label = new Label("", Ciel.getFont());
+        _label.color = Ciel.getOnNeutral();
+        _label.setPosition(Vec2f(8f, 0f));
+        _label.setAlign(UIAlignX.left, UIAlignY.center);
+        addUI(_label);
+
+        addEventListener("key", &_onKeyButton);
+        addEventListener("text", &_onText);
+        addEventListener("focus", &_onFocus);
+        addEventListener("blur", &_onBlur);
+
+        _onSelectionChange();
+    }
+
+    private void _onFocus() {
+        addEventListener("update", &_onUpdate);
+        _timer.start(60);
+        _caret.isEnabled = true;
+    }
+
+    private void _onBlur() {
+        removeEventListener("update", &_onUpdate);
+        _timer.stop();
+        _caret.isEnabled = false;
+    }
+
+    private void _onUpdate() {
+        _timer.update();
+        _caret.alpha = lerp(0.5f, 1f, easeInOutSine(_timer.value01()));
+    }
+
+    private void _onSelectionChange() {
+        if (_text.length) {
+            _caret.position = Vec2f(_label.getPosition()
+                    .x + (_label.getWidth() / _text.length) * _caretIndex, getHeight() / 2f);
+        }
+        else {
+            _caret.position = Vec2f(_label.getPosition().x, getHeight() / 2f);
+        }
+
+        if (_caretIndex != _selectionIndex) {
+            _selection.isEnabled = true;
+
+            Vec2f selectionPosition = Vec2f(_label.getPosition()
+                    .x + (_label.getWidth() / _text.length) * _selectionIndex, getHeight() / 2f);
+
+            const float minPos = min(selectionPosition.x, _caret.position.x);
+            const float selectionSize = abs(selectionPosition.x - _caret.position.x);
+            _selection.position = Vec2f(minPos, selectionPosition.y);
+            _selection.size = Vec2f(selectionSize, _label.getHeight());
+        }
+        else {
+            _selection.isEnabled = false;
+        }
+    }
+
+    private void _onKeyButton() {
+        if (!Etabli.ui.input.isPressed())
+            return;
+
+        InputEvent.KeyButton ev = Etabli.ui.input.asKeyButton();
+
+        switch (ev.button) with (InputEvent.KeyButton.Button) {
+        case right:
+            if (_selectionIndex != _caretIndex) {
+                if (!Etabli.input.isPressed(InputEvent.KeyButton.Button.leftShift) &&
+                    !Etabli.input.isPressed(InputEvent.KeyButton.Button.rightShift)) {
+                    uint maxPos = max(_selectionIndex, _caretIndex);
+                    _selectionIndex = maxPos;
+                    _caretIndex = maxPos;
+                }
+                else if (_caretIndex < _text.length) {
+                    if (Etabli.input.isPressed(InputEvent.KeyButton.Button.leftControl)) {
+                        _moveWordBorder(1);
+                    }
+                    else {
+                        _caretIndex++;
+                    }
+                }
+            }
+            else {
+                if (_caretIndex < _text.length) {
+                    if (Etabli.input.isPressed(InputEvent.KeyButton.Button.leftControl)) {
+                        _moveWordBorder(1);
+                    }
+                    else {
+                        _caretIndex++;
+                    }
+                }
+                if (!Etabli.input.isPressed(InputEvent.KeyButton.Button.leftShift) &&
+                    !Etabli.input.isPressed(InputEvent.KeyButton.Button.rightShift)) {
+                    _selectionIndex = _caretIndex;
+                }
+            }
+            _onSelectionChange();
+            break;
+        case left:
+            if (_selectionIndex != _caretIndex) {
+                if (!Etabli.input.isPressed(InputEvent.KeyButton.Button.leftShift) &&
+                    !Etabli.input.isPressed(InputEvent.KeyButton.Button.rightShift)) {
+                    uint minPos = min(_selectionIndex, _caretIndex);
+                    _selectionIndex = minPos;
+                    _caretIndex = minPos;
+                }
+                else if (_caretIndex > 0U) {
+                    if (Etabli.input.isPressed(InputEvent.KeyButton.Button.leftControl)) {
+                        _moveWordBorder(-1);
+                    }
+                    else {
+                        _caretIndex--;
+                    }
+                }
+            }
+            else {
+                if (_caretIndex > 0U) {
+                    if (Etabli.input.isPressed(InputEvent.KeyButton.Button.leftControl)) {
+                        _moveWordBorder(-1);
+                    }
+                    else {
+                        _caretIndex--;
+                    }
+                }
+                if (!Etabli.input.isPressed(InputEvent.KeyButton.Button.leftShift) &&
+                    !Etabli.input.isPressed(InputEvent.KeyButton.Button.rightShift)) {
+                    _selectionIndex = _caretIndex;
+                }
+            }
+            _onSelectionChange();
+            break;
+        case remove:
+            _removeSelection(1);
+            break;
+        case backspace:
+            _removeSelection(-1);
+            break;
+        case end:
+            _caretIndex = cast(uint) _text.length;
+            if (!Etabli.input.isPressed(InputEvent.KeyButton.Button.leftShift) &&
+                !Etabli.input.isPressed(InputEvent.KeyButton.Button.rightShift)) {
+                _selectionIndex = _caretIndex;
+            }
+            _onSelectionChange();
+            break;
+        case home:
+            _caretIndex = 0;
+            if (!Etabli.input.isPressed(InputEvent.KeyButton.Button.leftShift) &&
+                !Etabli.input.isPressed(InputEvent.KeyButton.Button.rightShift)) {
+                _selectionIndex = _caretIndex;
+            }
+            _onSelectionChange();
+            break;
+        case v:
+            if (Etabli.input.isPressed(InputEvent.KeyButton.Button.leftControl) ||
+                Etabli.input.isPressed(InputEvent.KeyButton.Button.rightControl)) {
+                if (Etabli.input.hasClipboard()) {
+                    _insertText(to!dstring(Etabli.input.getClipboard()));
+                }
+            }
+            break;
+        case c:
+            if (Etabli.input.isPressed(InputEvent.KeyButton.Button.leftControl) ||
+                Etabli.input.isPressed(InputEvent.KeyButton.Button.rightControl)) {
+                Etabli.input.setClipboard(_getSelection());
+            }
+            break;
+        case x:
+            if (Etabli.input.isPressed(InputEvent.KeyButton.Button.leftControl) ||
+                Etabli.input.isPressed(InputEvent.KeyButton.Button.rightControl)) {
+                Etabli.input.setClipboard(_getSelection());
+                _removeSelection(0);
+            }
+            break;
+        case q:
+            if (Etabli.input.isPressed(InputEvent.KeyButton.Button.leftControl) ||
+                Etabli.input.isPressed(InputEvent.KeyButton.Button.rightControl)) {
+                _caretIndex = cast(uint) _text.length;
+                _selectionIndex = 0U;
+                _onSelectionChange();
+            }
+            break;
+        default:
+            return;
+        }
+    }
+
+    private void _onText() {
+        if (_caretIndex >= _limit)
+            return;
+        const auto textInput = to!dstring(Etabli.ui.input.asTextInput().text);
+        if (_allowedCharacters.length) {
+            if (indexOf(_allowedCharacters, textInput) == -1)
+                return;
+        }
+        _insertText(textInput);
+    }
+
+    private void _insertText(dstring textInput) {
+        if (_caretIndex == _selectionIndex) {
+            if (_caretIndex == _text.length)
+                _text ~= textInput;
+            else if (_caretIndex == 0U)
+                _text = textInput ~ _text;
+            else
+                _text = _text[0U .. _caretIndex] ~ textInput ~ _text[_caretIndex .. $];
+            _caretIndex += textInput.length;
+        }
+        else {
+            const int minSelect = min(_caretIndex, _selectionIndex);
+            const int maxSelect = max(_caretIndex, _selectionIndex);
+            if (minSelect == 0U && maxSelect == _text.length) {
+                _text = textInput;
+                _caretIndex = cast(uint) _text.length;
+            }
+            else if (minSelect == 0U) {
+                _text = textInput ~ _text[maxSelect .. $];
+                _caretIndex = cast(uint) textInput.length;
+            }
+            else if (maxSelect == _text.length) {
+                _text = _text[0U .. minSelect] ~ textInput;
+                _caretIndex = cast(uint) _text.length;
+            }
+            else {
+                _text = _text[0U .. minSelect] ~ textInput ~ _text[maxSelect .. $];
+                _caretIndex = minSelect + cast(uint) textInput.length;
+            }
+        }
+        _label.text = to!string(_text);
+        _selectionIndex = _caretIndex;
+        _onSelectionChange();
+        dispatchEvent("input");
+    }
+
+    private void _moveWordBorder(int direction) {
+        int currentIndex = cast(int) _caretIndex;
+        if (direction > 0) {
+            for (; currentIndex < _text.length; ++currentIndex) {
+                if (isPunctuation(_text[currentIndex]) || isWhite(_text[currentIndex])) {
+                    if (currentIndex == _caretIndex)
+                        currentIndex++;
+                    break;
+                }
+            }
+            _caretIndex = currentIndex;
+        }
+        else {
+            currentIndex--;
+            for (; currentIndex >= 0; --currentIndex) {
+                if (isPunctuation(_text[currentIndex]) || isWhite(_text[currentIndex])) {
+                    if (currentIndex + 1 == _caretIndex)
+                        currentIndex--;
+                    break;
+                }
+            }
+            _caretIndex = currentIndex + 1;
+        }
+    }
+
+    private void _removeSelection(int direction) {
+        if (_text.length) {
+            if (_caretIndex == _selectionIndex) {
+                if (direction > 0) {
+                    if (_caretIndex == 0U)
+                        _text = _text[1U .. $];
+                    else if (_caretIndex != _text.length) {
+                        _text = _text[0U .. _caretIndex] ~ _text[_caretIndex + 1 .. $];
+                    }
+                }
+                else {
+                    if (_caretIndex == _text.length) {
+                        _text.length--;
+                        _caretIndex--;
+                    }
+                    else if (_caretIndex != 0U) {
+                        _text = _text[0U .. _caretIndex - 1] ~ _text[_caretIndex .. $];
+                        _caretIndex--;
+                    }
+                }
+            }
+            else {
+                const int minSelect = min(_caretIndex, _selectionIndex);
+                const int maxSelect = max(_caretIndex, _selectionIndex);
+                if (minSelect == 0 && maxSelect == _text.length) {
+                    _text.length = 0;
+                    _caretIndex = 0;
+                }
+                else if (minSelect == 0) {
+                    _text = _text[maxSelect .. $];
+                    _caretIndex = 0;
+                }
+                else if (maxSelect == _text.length) {
+                    _text = _text[0 .. minSelect];
+                    _caretIndex = minSelect;
+                }
+                else {
+                    _text = _text[0 .. minSelect] ~ _text[maxSelect .. $];
+                    _caretIndex = minSelect;
+                }
+            }
+            _label.text = to!string(_text);
+            _selectionIndex = _caretIndex;
+        }
+        _onSelectionChange();
+        dispatchEvent("input");
+    }
+
+    private string _getSelection() {
+        dstring txt = to!dstring(_label.text);
+        if (_selectionIndex == _caretIndex || (txt.length == 0)) {
+            return "";
+        }
+        const int minIndex = min(_selectionIndex, _caretIndex);
+        const int maxIndex = max(_selectionIndex, _caretIndex);
+        txt = txt[minIndex .. maxIndex];
+        return to!string(txt);
+    }
+
+    void setAllowedCharacters(dstring allowedCharacters) {
+        _allowedCharacters = allowedCharacters;
+    }
+}
