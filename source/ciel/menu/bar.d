@@ -33,6 +33,7 @@ class MenuBar : UIElement {
 
         _box = new HBox;
         _box.setAlign(UIAlignX.left, UIAlignY.center);
+        _box.setChildAlign(UIAlignY.top);
         _box.setMargin(Vec2f(8f, 4f));
         addUI(_box);
 

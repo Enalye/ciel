@@ -9,7 +9,7 @@ import etabli;
 import ciel.window;
 import ciel.button.button;
 
-final class SecondaryButton : Button {
+final class SecondaryButton : TextButton!RoundedRectangle {
     private {
         RoundedRectangle _background;
     }

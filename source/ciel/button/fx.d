@@ -34,9 +34,15 @@ final class RippleEffect {
         _radius = radius_ * 2f;
         _ripples = new Array!Ripple;
 
-        _circle = new Circle(_radius, true, 0f);
+        _circle = Circle.fill(_radius);
         _circle.blend = Blend.alpha;
         _circle.noCache = true;
+        _circle.cache();
+    }
+
+    void setRadius(float radius_) {
+        _radius = radius_ * 2f;
+        _circle.radius = radius_;
         _circle.cache();
     }
 
@@ -126,10 +132,10 @@ final class RippleEffect {
     }
 }
 
-final class ButtonFx {
+final class ButtonFx(ImageType) {
     private {
         UIElement _element;
-        RoundedRectangle _mask;
+        ImageType _mask;
         RippleEffect _rippleEffect;
         Color _color;
     }
@@ -137,7 +143,22 @@ final class ButtonFx {
     this(UIElement element) {
         _element = element;
 
-        _mask = RoundedRectangle.fill(_element.getSize(), Ciel.getCorner());
+        static if (is(ImageType == RoundedRectangle)) {
+            _mask = RoundedRectangle.fill(_element.getSize(), Ciel.getCorner());
+        }
+        else static if (is(ImageType == Rectangle)) {
+            _mask = Rectangle.fill(_element.getSize());
+        }
+        else static if (is(ImageType == Capsule)) {
+            _mask = Capsule.fill(_element.getSize());
+        }
+        else static if (is(ImageType == Circle)) {
+            _mask = Circle.fill(_element.getSize().max());
+        }
+        else {
+            static assert(false, "type non supporté");
+        }
+
         _mask.anchor = Vec2f.zero;
         _mask.blend = Blend.mask;
 
@@ -180,5 +201,24 @@ final class ButtonFx {
 
     void onUpdate(Vec2f position) {
         _rippleEffect.onUpdate(position);
+    }
+
+    void onSize() {
+        static if (is(ImageType == RoundedRectangle)) {
+            _mask.size = _element.getSize();
+        }
+        else static if (is(ImageType == Rectangle)) {
+            _mask.size = _element.getSize();
+        }
+        else static if (is(ImageType == Capsule)) {
+            _mask.size = _element.getSize();
+        }
+        else static if (is(ImageType == Circle)) {
+            _mask.radius = _element.getSize().max();
+        }
+        else {
+            static assert(false, "type non supporté");
+        }
+        _rippleEffect.setRadius(_element.getSize().x);
     }
 }

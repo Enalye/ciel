@@ -10,7 +10,7 @@ import ciel.window;
 import ciel.menu.bar;
 import ciel.button;
 
-final class MenuButton : Button {
+final class MenuButton : TextButton!RoundedRectangle {
     private {
         RoundedRectangle _background;
         MenuBar _bar;

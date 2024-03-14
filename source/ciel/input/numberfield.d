@@ -13,7 +13,7 @@ import ciel.button;
 import ciel.window;
 import ciel.input.textfield;
 
-final class ControlButton : Button {
+final class ControlButton : TextButton!RoundedRectangle {
     private {
         RoundedRectangle _background;
     }
@@ -101,6 +101,71 @@ final class NumberField : UIElement {
         }
         catch (Exception e) {
             value(0f);
+        }
+    }
+}
+
+final class IntegerField : UIElement {
+    private {
+        TextField _textField;
+        ControlButton _decrementBtn, _incrementBtn;
+        int _value = 0;
+        int _step = 1;
+        int _minValue = int.min;
+        int _maxValue = int.max;
+    }
+
+    @property {
+        int value() const {
+            return _value;
+        }
+
+        int value(int value_) {
+            _value = clamp(value_, _minValue, _maxValue);
+            _textField.text = to!string(_value);
+            return _value;
+        }
+    }
+
+    this() {
+        setSize(Vec2f(150f, 32f));
+
+        _textField = new TextField();
+        _textField.text = "0";
+        _textField.setAllowedCharacters("0123456789+-");
+        _textField.setSize(getSize());
+        _textField.setInnerMargin(4f, 70f);
+        addUI(_textField);
+
+        HBox box = new HBox;
+        box.setAlign(UIAlignX.right, UIAlignY.center);
+        box.setChildAlign(UIAlignY.center);
+        addUI(box);
+
+        _decrementBtn = new ControlButton("-");
+        box.addUI(_decrementBtn);
+
+        _incrementBtn = new ControlButton("+");
+        box.addUI(_incrementBtn);
+
+        _incrementBtn.addEventListener("click", { value(_value + _step); });
+        _decrementBtn.addEventListener("click", { value(_value - _step); });
+        _textField.addEventListener("input", &_onInput);
+    }
+
+    void setRange(int minValue, int maxValue) {
+        _minValue = minValue;
+        _maxValue = maxValue;
+        value(_value);
+    }
+
+    private void _onInput() {
+        try {
+            string text = _textField.text;
+            _value = clamp(to!int(text), _minValue, _maxValue);
+        }
+        catch (Exception e) {
+            value(0);
         }
     }
 }

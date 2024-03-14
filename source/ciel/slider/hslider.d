@@ -19,7 +19,7 @@ final class HSlider : Slider {
     /// Ctor
     this() {
         scrollAngle = 0f;
-        setSize(Vec2f(200f, 32f));
+        setSize(Vec2f(150f, 32f));
 
         _backgroundBar = new Rectangle(Vec2f(scrollLength, 2f), true, 1f);
         _backgroundBar.color = Ciel.getNeutral();

@@ -13,4 +13,6 @@ public {
     import ciel.button.outlined;
     import ciel.button.primary;
     import ciel.button.secondary;
+    import ciel.button.switch_;
+    import ciel.button.toggle;
 }
