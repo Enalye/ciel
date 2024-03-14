@@ -17,12 +17,15 @@ final class TextField : UIElement {
     private {
         RoundedRectangle _background, _outline;
         Rectangle _caret, _selection;
+        UIElement _textContainer;
         Label _label;
         dstring _text, _allowedCharacters;
         uint _caretIndex = 0U, _selectionIndex = 0u;
         Timer _timer;
         uint _limit = 80u;
-        float _caretAlpha = 1f; //suppr
+        float _targetOffset = 0f, _currentOffset = 0f;
+        bool _updateMouseMove;
+        Vec2f _innerMargins = Vec2f(4f, 4f);
     }
 
     @property {
@@ -55,8 +58,9 @@ final class TextField : UIElement {
     }
 
     this() {
-        setSize(Vec2f(150f, 25f));
+        setSize(Vec2f(150f, 32f));
         focusable = true;
+        _timer.mode = Timer.Mode.bounce;
 
         _background = RoundedRectangle.fill(getSize(), Ciel.getCorner());
         _background.anchor = Vec2f.zero;
@@ -68,69 +72,138 @@ final class TextField : UIElement {
         _outline.color = Ciel.getNeutral();
         addImage(_outline);
 
+        _textContainer = new UIElement;
+        _textContainer.setAlign(UIAlignX.left, UIAlignY.center);
+        _textContainer.setSize(Vec2f(getWidth() - _innerMargins.sum(), Ciel.getFont().size()));
+        _textContainer.setPosition(Vec2f(_innerMargins.x, 0f));
+        _textContainer.isEnabled = false;
+        addUI(_textContainer);
+
         _selection = Rectangle.fill(Vec2f(2f, Ciel.getFont().size()));
         _selection.anchor = Vec2f(0f, 0.5f);
         _selection.color = Ciel.getAccent();
         _selection.alpha = 0.5f;
         _selection.isEnabled = false;
-        addImage(_selection);
+        _textContainer.addImage(_selection);
 
-        _caret = Rectangle.fill(Vec2f(2f, Ciel.getFont().size()));
+        _caret = Rectangle.fill(Vec2f(1f, Ciel.getFont().size()));
         _caret.anchor = Vec2f.half;
-        _caret.color = Ciel.getNeutral();
+        _caret.color = Ciel.getOnNeutral();
         _caret.isEnabled = false;
         _caret.alpha = 0f;
-        addImage(_caret);
-
-        _caretAlpha = 1f;
-        _timer.mode = Timer.Mode.bounce;
-        _timer.start(60);
+        _textContainer.addImage(_caret);
 
         _label = new Label("", Ciel.getFont());
         _label.color = Ciel.getOnNeutral();
-        _label.setPosition(Vec2f(8f, 0f));
+        _label.setPosition(Vec2f(0f, 0f));
         _label.setAlign(UIAlignX.left, UIAlignY.center);
-        addUI(_label);
+        _textContainer.addUI(_label);
 
+        addEventListener("mousedown", &_onMouseDown);
+        addEventListener("mouserelease", &_onMouseRelease);
         addEventListener("key", &_onKeyButton);
         addEventListener("text", &_onText);
         addEventListener("focus", &_onFocus);
         addEventListener("blur", &_onBlur);
+        addEventListener("update", &_onUpdate);
+        addEventListener("size", &_onSize);
 
         _onSelectionChange();
     }
 
+    private void _onSize() {
+        _background.size = getSize();
+        _outline.size = getSize();
+        _outline.size = getSize();
+        _textContainer.setSize(Vec2f(getWidth() - _innerMargins.sum(), Ciel.getFont().size()));
+        _textContainer.setPosition(Vec2f(_innerMargins.x, 0f));
+        _onSelectionChange();
+    }
+
+    private uint getCarretPosition() {
+        return cast(uint) _label.getIndexOf(getMousePosition() - (
+                _textContainer.getPosition() + Vec2f(_targetOffset, 0f)));
+    }
+
+    private void _onMouseDown() {
+        _caretIndex = getCarretPosition();
+        _selectionIndex = _caretIndex;
+        _onSelectionChange();
+        addEventListener("mousemove", &_onMouseMove);
+    }
+
+    private void _onMouseRelease() {
+        removeEventListener("mousemove", &_onMouseMove);
+        _updateMouseMove = false;
+    }
+
+    private void _onMouseMove() {
+        if (!hasFocus())
+            return;
+        _caretIndex = getCarretPosition();
+        _onSelectionChange(true);
+    }
+
     private void _onFocus() {
-        addEventListener("update", &_onUpdate);
+        addEventListener("update", &_onFocusUpdate);
         _timer.start(60);
         _caret.isEnabled = true;
+        _outline.color = Ciel.getAccent();
     }
 
     private void _onBlur() {
-        removeEventListener("update", &_onUpdate);
+        removeEventListener("update", &_onFocusUpdate);
         _timer.stop();
         _caret.isEnabled = false;
+        _selection.isEnabled = false;
+        _outline.color = Ciel.getNeutral();
+        _updateMouseMove = false;
+        _selectionIndex = _caretIndex;
     }
 
     private void _onUpdate() {
-        _timer.update();
-        _caret.alpha = lerp(0.5f, 1f, easeInOutSine(_timer.value01()));
+        Vec2f caretPos = Vec2f(_label.getTextSize(0, _caretIndex).x, _textContainer.getHeight() / 2f);
+
+        _currentOffset = lerp(_currentOffset, _targetOffset, 0.25f);
+        _label.setPosition(Vec2f(_currentOffset, 0f));
+        _caret.position = caretPos + Vec2f(_currentOffset, 0f);
+
+        if (_caretIndex != _selectionIndex) {
+            Vec2f selectionPosition = Vec2f(_label.getPosition().x + _label.getTextSize(0,
+                    _selectionIndex).x, _textContainer.getHeight() / 2f);
+
+            const float minPos = min(selectionPosition.x, _caret.position.x);
+            const float selectionSize = abs(selectionPosition.x - _caret.position.x);
+            _selection.position = Vec2f(minPos, selectionPosition.y);
+            _selection.size = Vec2f(selectionSize, _label.getHeight());
+        }
     }
 
-    private void _onSelectionChange() {
-        if (_text.length) {
-            _caret.position = Vec2f(_label.getPosition()
-                    .x + (_label.getWidth() / _text.length) * _caretIndex, getHeight() / 2f);
+    private void _onFocusUpdate() {
+        _timer.update();
+        _caret.alpha = lerp(0.5f, 1f, easeInOutSine(_timer.value01()));
+        if (_updateMouseMove)
+            _onMouseMove();
+    }
+
+    private void _onSelectionChange(bool byMouse = false) {
+        float border = 8f;
+        Vec2f caretPos = Vec2f(_label.getTextSize(0, _caretIndex).x, _textContainer.getHeight() / 2f);
+
+        if (caretPos.x + _targetOffset > _textContainer.getWidth() - border) {
+            _updateMouseMove = byMouse;
+            _targetOffset = _textContainer.getWidth() - (border + caretPos.x);
         }
-        else {
-            _caret.position = Vec2f(_label.getPosition().x, getHeight() / 2f);
+        else if (caretPos.x + _targetOffset < border) {
+            _updateMouseMove = byMouse;
+            _targetOffset = border - caretPos.x;
         }
 
         if (_caretIndex != _selectionIndex) {
             _selection.isEnabled = true;
 
-            Vec2f selectionPosition = Vec2f(_label.getPosition()
-                    .x + (_label.getWidth() / _text.length) * _selectionIndex, getHeight() / 2f);
+            Vec2f selectionPosition = Vec2f(_label.getPosition().x + _label.getTextSize(0,
+                    _selectionIndex).x, _textContainer.getHeight() / 2f);
 
             const float minPos = min(selectionPosition.x, _caret.position.x);
             const float selectionSize = abs(selectionPosition.x - _caret.position.x);
@@ -404,5 +477,11 @@ final class TextField : UIElement {
 
     void setAllowedCharacters(dstring allowedCharacters) {
         _allowedCharacters = allowedCharacters;
+    }
+
+    void setInnerMargin(float leftMargin, float rightMargin) {
+        _innerMargins = Vec2f(leftMargin, rightMargin);
+        _textContainer.setSize(Vec2f(getWidth() - _innerMargins.sum(), Ciel.getFont().size()));
+        _textContainer.setPosition(Vec2f(_innerMargins.x, 0f));
     }
 }
