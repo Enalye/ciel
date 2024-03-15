@@ -3,19 +3,17 @@
  * License: Zlib
  * Authors: Enalye
  */
-module ciel.button.switch_;
+module ciel.button.checkbox;
 
 import etabli;
 import ciel.window;
 import ciel.button.button;
 
-final class SwitchButton : Button!Capsule {
+final class Checkbox : Button!RoundedRectangle {
     private {
-        Capsule _background;
-        Circle _circle;
+        RoundedRectangle _background;
+        Rectangle _tick1, _tick2;
         bool _value;
-        Timer _clickTimer;
-        float _startPosition = 0f, _endPosition = 0f;
     }
 
     @property {
@@ -30,24 +28,36 @@ final class SwitchButton : Button!Capsule {
     }
 
     this(bool isChecked = false) {
-        setSize(Vec2f(48f, 24f));
         _value = isChecked;
+        setSize(Vec2f(24f, 24f));
 
-        _background = Capsule.fill(getSize());
+        _background = RoundedRectangle.outline(getSize(), Ciel.getCorner(), 2f);
         _background.anchor = Vec2f.zero;
         _background.color = _value ? Ciel.getAccent() : Ciel.getNeutral();
+        _background.filled = _value;
         addImage(_background);
 
-        _circle = Circle.fill(18f);
-        _circle.color = Ciel.getOnNeutral();
-        _circle.anchor = Vec2f.half;
-        _circle.position = Vec2f(_value ? 36f : 12f, getHeight() / 2f);
-        addImage(_circle);
+        _tick1 = Rectangle.fill(Vec2f(7f, 2f));
+        _tick1.position = Vec2f(11f, 17f);
+        _tick1.color = Ciel.getOnAccent();
+        _tick1.angle = 45f;
+        _tick1.anchor = Vec2f(1f, 0.5f);
+        _tick1.pivot = Vec2f(1f, 0.5f);
+        _tick1.isEnabled = _value;
+        addImage(_tick1);
+
+        _tick2 = Rectangle.fill(Vec2f(11f, 2f));
+        _tick2.position = Vec2f(10f, 16f);
+        _tick2.color = Ciel.getOnAccent();
+        _tick2.angle = -45f;
+        _tick2.anchor = Vec2f(0f, 0.5f);
+        _tick2.pivot = Vec2f(0f, 0.5f);
+        _tick2.isEnabled = _value;
+        addImage(_tick2);
 
         setFxColor(_value ? Ciel.getAccent() : Ciel.getNeutral());
 
         addEventListener("click", &_onClick);
-        addEventListener("update", &_onUpdate);
 
         addEventListener("mouseenter", &_onMouseEnter);
         addEventListener("mouseleave", &_onMouseLeave);
@@ -73,28 +83,17 @@ final class SwitchButton : Button!Capsule {
             return;
 
         _value = value_;
-        _clickTimer.start(60);
-
-        _startPosition = _circle.position.x;
-        _endPosition = _value ? 36f : 12f;
-
         setFxColor(_value ? Ciel.getAccent() : Ciel.getNeutral());
+
+        _tick1.isEnabled = _value;
+        _tick2.isEnabled = _value;
+        _background.filled = _value;
 
         if (isHovered) {
             _onMouseEnter();
         }
         else {
             _onMouseLeave();
-        }
-    }
-
-    private void _onUpdate() {
-        if (_clickTimer.isRunning) {
-            _clickTimer.update();
-            _circle.radius = lerp(10f, 18f, easeOutBounce(_clickTimer.value01()));
-
-            _circle.position.x = lerp(_startPosition, _endPosition,
-                easeOutElastic(_clickTimer.value01()));
         }
     }
 }

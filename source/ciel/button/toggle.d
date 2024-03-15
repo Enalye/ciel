@@ -20,15 +20,28 @@ final class ToggleButton : Button!Capsule {
         float _selectionWidth = 0f;
     }
 
-    this(string inactiveText, string activeText) {
+    @property {
+        bool value() const {
+            return _value;
+        }
+
+        bool value(bool value_) {
+            _updateValue(value_);
+            return _value;
+        }
+    }
+
+    this(string inactiveText, string activeText, bool isChecked = false) {
+        _value = isChecked;
+
         _inactiveLabel = new Label(inactiveText, Ciel.getFont());
         _inactiveLabel.setAlign(UIAlignX.left, UIAlignY.center);
-        _inactiveLabel.color = Ciel.getNeutral();
+        _inactiveLabel.color = _value ? Ciel.getOnAccent() : Ciel.getNeutral();
         addUI(_inactiveLabel);
 
         _activeLabel = new Label(activeText, Ciel.getFont());
         _activeLabel.setAlign(UIAlignX.right, UIAlignY.center);
-        _activeLabel.color = Ciel.getOnNeutral();
+        _activeLabel.color = _value ? Ciel.getAccent() : Ciel.getOnAccent();
         addUI(_activeLabel);
 
         _selectionWidth = max(_inactiveLabel.getWidth(), _activeLabel.getWidth()) + 6f;
@@ -39,17 +52,19 @@ final class ToggleButton : Button!Capsule {
         _activeLabel.setPosition(Vec2f(3f + (_selectionWidth - _activeLabel.getWidth()) / 2f, 0f));
 
         _background = Capsule.fill(getSize());
-        _background.color = Ciel.getNeutral();
+        _background.color = _value ? Ciel.getAccent() : Ciel.getNeutral();
         _background.anchor = Vec2f.zero;
         addImage(_background);
 
         _selection = Capsule.fill(Vec2f(_selectionWidth, Ciel.getFont().size));
         _selection.color = Ciel.getOnNeutral();
         _selection.anchor = Vec2f.half;
-        _selection.position = Vec2f(_selectionWidth / 2f + 3f, getHeight() / 2f);
+        _selection.position = Vec2f(_value ?
+                getWidth() - (_selectionWidth / 2f + 3f) : _selectionWidth / 2f + 3f,
+                getHeight() / 2f);
         addImage(_selection);
 
-        setFxColor(Ciel.getNeutral());
+        setFxColor(_value ? Ciel.getAccent() : Ciel.getNeutral());
 
         addEventListener("click", &_onClick);
         addEventListener("update", &_onUpdate);
@@ -70,7 +85,14 @@ final class ToggleButton : Button!Capsule {
     }
 
     private void _onClick() {
-        _value = !_value;
+        _updateValue(!_value);
+    }
+
+    private void _updateValue(bool value_) {
+        if (_value == value_)
+            return;
+
+        _value = value_;
         _clickTimer.start(60);
 
         _startPosition = _selection.position.x;
