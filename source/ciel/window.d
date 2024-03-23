@@ -98,6 +98,14 @@ final class Ciel {
         void clearUI() {
             _etabli.ui.clearUI();
         }
+
+        void pushModalUI(UIElement element) {
+            _etabli.ui.pushModalUI(element);
+        }
+
+        void popModalUI() {
+            _etabli.ui.popModalUI();
+        }
     }
 
     /// Init

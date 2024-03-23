@@ -6,6 +6,7 @@
 module ciel.panel;
 
 public {
-    import ciel.panel.surface;
     import ciel.panel.container;
+    import ciel.panel.modal;
+    import ciel.panel.surface;
 }
