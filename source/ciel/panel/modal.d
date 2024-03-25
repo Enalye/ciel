@@ -22,7 +22,7 @@ class Modal : UIElement {
         _background.color = Ciel.getSurface();
         addImage(_background);
 
-        _outline = RoundedRectangle.outline(getSize(), Ciel.getCorner(), 2f);
+        _outline = RoundedRectangle.outline(getSize(), Ciel.getCorner(), 1f);
         _outline.anchor = Vec2f.zero;
         _outline.color = Ciel.getNeutral();
         addImage(_outline);

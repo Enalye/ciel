@@ -7,5 +7,6 @@ module ciel.input;
 
 public {
     import ciel.input.numberfield;
+    import ciel.input.pathfield;
     import ciel.input.textfield;
 }

@@ -7,4 +7,5 @@ module ciel.scrollbar;
 
 public {
     import ciel.scrollbar.hscrollbar;
+    import ciel.scrollbar.vscrollbar;
 }

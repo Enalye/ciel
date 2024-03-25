@@ -3,19 +3,19 @@
  * License: Zlib
  * Authors: Enalye
  */
-module ciel.scrollbar.hscrollbar;
+module ciel.scrollbar.vscrollbar;
 
 import etabli;
 import ciel.window;
 
-final class HScrollbar : Scrollbar {
+final class VScrollbar : Scrollbar {
     private {
         Capsule _background, _handle;
     }
 
     this() {
-        setSize(Vec2f(0f, 9f));
-        setSizeLock(false, true);
+        setSize(Vec2f(9f, 0f));
+        setSizeLock(true, false);
 
         _background = Capsule.fill(getSize());
         _background.anchor = Vec2f.zero;
@@ -33,23 +33,23 @@ final class HScrollbar : Scrollbar {
     }
 
     protected override float _getScrollLength() const {
-        return getWidth();
+        return getHeight();
     }
 
     protected override float _getScrollMousePosition() const {
-        return getMousePosition().x;
+        return getMousePosition().y;
     }
 
     private void _onHandlePosition() {
-        _handle.position.x = getHandlePosition();
+        _handle.position.y = getHandlePosition();
     }
 
     private void _onHandleSize() {
-        _handle.size = Vec2f(getHandleSize(), getHeight());
+        _handle.size = Vec2f(getWidth(), getHandleSize());
     }
 
     private void _onSize() {
         _background.size = getSize();
-        _handle.size = Vec2f(getHandleSize(), getHeight());
+        _handle.size = Vec2f(getWidth(), getHandleSize());
     }
 }
