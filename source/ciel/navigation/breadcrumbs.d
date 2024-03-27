@@ -90,14 +90,14 @@ final class Breadcrumbs : UIElement {
 
     private void _reloadPath() {
         _box.clearUI();
+        _parts.length = 0;
+        _separators.length = 0;
         foreach (element; _path) {
             addPath(element);
         }
     }
 
     private void _onCrumbClick(size_t index) {
-        import std.stdio;
-
         for (size_t i = index + 1; i < _parts.length; ++i) {
             _parts[i].remove();
         }
@@ -108,6 +108,8 @@ final class Breadcrumbs : UIElement {
         }
         _separators.length = index;
 
-        writeln(index);
+        _path.length = _parts.length;
+
+        dispatchEvent("value", false);
     }
 }

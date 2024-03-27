@@ -65,7 +65,7 @@ final class NumberField : UIElement {
 
         float value(float value_) {
             _value = clamp(value_, _minValue, _maxValue);
-            _textField.text = to!string(_value);
+            _textField.value = to!string(_value);
             return _value;
         }
     }
@@ -74,7 +74,7 @@ final class NumberField : UIElement {
         setSize(Vec2f(150f, 32f));
 
         _textField = new TextField();
-        _textField.text = "0";
+        _textField.value = "0";
         _textField.setAllowedCharacters("0123456789+-.,");
         _textField.setSize(getSize());
         _textField.setInnerMargin(4f, 70f);
@@ -95,7 +95,7 @@ final class NumberField : UIElement {
 
         _incrementBtn.addEventListener("click", { value(_value + _step); });
         _decrementBtn.addEventListener("click", { value(_value - _step); });
-        _textField.addEventListener("input", &_onInput);
+        _textField.addEventListener("value", &_onValue);
 
         addEventListener("enable", &_onEnableChange);
         addEventListener("disable", &_onEnableChange);
@@ -113,9 +113,9 @@ final class NumberField : UIElement {
         value(_value);
     }
 
-    private void _onInput() {
+    private void _onValue() {
         try {
-            string text = _textField.text;
+            string text = _textField.value;
             text = text.replace(',', '.');
             _value = clamp(to!float(text), _minValue, _maxValue);
         }
@@ -142,7 +142,7 @@ final class IntegerField : UIElement {
 
         int value(int value_) {
             _value = clamp(value_, _minValue, _maxValue);
-            _textField.text = to!string(_value);
+            _textField.value = to!string(_value);
             return _value;
         }
     }
@@ -151,7 +151,7 @@ final class IntegerField : UIElement {
         setSize(Vec2f(150f, 32f));
 
         _textField = new TextField();
-        _textField.text = "0";
+        _textField.value = "0";
         _textField.setAllowedCharacters("0123456789+-");
         _textField.setSize(getSize());
         _textField.setInnerMargin(4f, 70f);
@@ -170,7 +170,7 @@ final class IntegerField : UIElement {
 
         _incrementBtn.addEventListener("click", { value(_value + _step); });
         _decrementBtn.addEventListener("click", { value(_value - _step); });
-        _textField.addEventListener("input", &_onInput);
+        _textField.addEventListener("value", &_onValue);
 
         addEventListener("enable", &_onEnableChange);
         addEventListener("disable", &_onEnableChange);
@@ -188,9 +188,9 @@ final class IntegerField : UIElement {
         value(_value);
     }
 
-    private void _onInput() {
+    private void _onValue() {
         try {
-            string text = _textField.text;
+            string text = _textField.value;
             _value = clamp(to!int(text), _minValue, _maxValue);
         }
         catch (Exception e) {

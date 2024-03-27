@@ -147,5 +147,7 @@ final class RadioButton : Button!Circle {
         else {
             _onMouseLeave();
         }
+
+        dispatchEvent("value", false);
     }
 }

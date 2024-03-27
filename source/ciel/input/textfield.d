@@ -29,11 +29,11 @@ final class TextField : UIElement {
     }
 
     @property {
-        string text() const {
+        string value() const {
             return to!string(_text);
         }
 
-        string text(string text_) {
+        string value(string text_) {
             _text = to!dstring(text_);
             _caretIndex = to!uint(_text.length);
             _selectionIndex = _caretIndex;
@@ -353,6 +353,10 @@ final class TextField : UIElement {
                 _onSelectionChange();
             }
             break;
+        case enter:
+        case enter2:
+            dispatchEvent("validate", false);
+            break;
         default:
             return;
         }
@@ -402,7 +406,7 @@ final class TextField : UIElement {
         _label.text = to!string(_text);
         _selectionIndex = _caretIndex;
         _onSelectionChange();
-        dispatchEvent("input");
+        dispatchEvent("value", false);
     }
 
     private void _moveWordBorder(int direction) {
@@ -475,7 +479,7 @@ final class TextField : UIElement {
             _selectionIndex = _caretIndex;
         }
         _onSelectionChange();
-        dispatchEvent("input");
+        dispatchEvent("value", false);
     }
 
     private string _getSelection() {

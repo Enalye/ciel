@@ -116,5 +116,7 @@ final class Checkbox : Button!RoundedRectangle {
         else {
             _onMouseLeave();
         }
+
+        dispatchEvent("value", false);
     }
 }

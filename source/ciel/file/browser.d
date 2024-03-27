@@ -5,7 +5,10 @@
  */
 module ciel.file.browser;
 
-import std.file, std.path, std.string;
+import std.file;
+import std.path;
+import std.string;
+import std.typecons : No;
 import etabli;
 import ciel.button;
 import ciel.input;
@@ -15,12 +18,16 @@ import ciel.navigation;
 
 final class FileBrowser : Modal {
     private {
-        TextField _uriField, _searchField;
+        PathField _uriField;
+        TextField _searchField;
         VList _list;
         FileItem[] _items;
         FileItem _selectedItem;
         UIElement _validateBtn;
-        string _value;
+        string _directory, _value;
+
+        GhostButton _prevButton, _nextButton;
+        string[] _prevHistory, _nextHistory;
     }
 
     @property {
@@ -31,6 +38,8 @@ final class FileBrowser : Modal {
 
     this() {
         setSize(Vec2f(700f, 500f));
+
+        _directory = getcwd();
 
         GhostButton exitBtn = new GhostButton("X");
         exitBtn.setAlign(UIAlignX.right, UIAlignY.top);
@@ -44,22 +53,25 @@ final class FileBrowser : Modal {
         headerBox.setSpacing(4f);
         addUI(headerBox);
 
-        GhostButton prevBtn = new GhostButton("<");
-        headerBox.addUI(prevBtn);
+        _prevButton = new GhostButton("<");
+        _prevButton.isEnabled = false;
+        _prevButton.addEventListener("click", &_onPrevious);
+        headerBox.addUI(_prevButton);
 
-        GhostButton nextBtn = new GhostButton(">");
-        headerBox.addUI(nextBtn);
-
-        GhostButton upBtn = new GhostButton("^");
-        headerBox.addUI(upBtn);
-
-        _uriField = new TextField;
-        _uriField.setAlign(UIAlignX.left, UIAlignY.top);
-        _uriField.setSize(Vec2f(450f, _uriField.getHeight()));
-        headerBox.addUI(_uriField);
+        _nextButton = new GhostButton(">");
+        _nextButton.isEnabled = false;
+        _nextButton.addEventListener("click", &_onNext);
+        headerBox.addUI(_nextButton);
 
         GhostButton reloadBtn = new GhostButton("R");
+        reloadBtn.addEventListener("click", &_reloadDir);
         headerBox.addUI(reloadBtn);
+
+        _uriField = new PathField(_directory);
+        _uriField.setAlign(UIAlignX.left, UIAlignY.top);
+        _uriField.setSize(Vec2f(450f, _uriField.getHeight()));
+        _uriField.addEventListener("value", &_onUriChange);
+        headerBox.addUI(_uriField);
 
         {
             HBox searchBox = new HBox;
@@ -74,7 +86,8 @@ final class FileBrowser : Modal {
 
             _searchField = new TextField;
             _searchField.setAlign(UIAlignX.left, UIAlignY.top);
-            _searchField.setSize(Vec2f(150f, _uriField.getHeight()));
+            _searchField.setSize(Vec2f(250f, _uriField.getHeight()));
+            _searchField.addEventListener("value", &_reloadDir);
             searchBox.addUI(_searchField);
         }
 
@@ -101,18 +114,82 @@ final class FileBrowser : Modal {
         _reloadDir();
     }
 
+    private void _onPrevious() {
+        if (!_prevHistory.length)
+            return;
+
+        _nextHistory ~= _directory;
+        _directory = _prevHistory[$ - 1];
+        _prevHistory.length--;
+        _prevButton.isEnabled = _prevHistory.length > 0;
+        _nextButton.isEnabled = _nextHistory.length > 0;
+        _reloadDir();
+    }
+
+    private void _onNext() {
+        if (!_nextHistory.length)
+            return;
+
+        _prevHistory ~= _directory;
+        _directory = _nextHistory[$ - 1];
+        _nextHistory.length--;
+        _prevButton.isEnabled = _prevHistory.length > 0;
+        _nextButton.isEnabled = _nextHistory.length > 0;
+        _reloadDir();
+    }
+
+    private void _onUriChange() {
+        string path = _uriField.value;
+        if (exists(path)) {
+            if (!isDir(path)) {
+                path = dirName(path);
+            }
+
+            _prevHistory ~= _directory;
+            _nextHistory.length = 0;
+            _prevButton.isEnabled = true;
+            _nextButton.isEnabled = false;
+
+            _directory = path;
+            _reloadDir();
+        }
+        else {
+            _uriField.value = _directory;
+        }
+    }
+
     private void _onValidate() {
         if (!_selectedItem)
             return;
 
         _value = _selectedItem.path;
-        dispatchEvent("value", false);
+        if (!isDir(_value)) {
+            dispatchEvent("value", false);
+        }
+        else {
+            _prevHistory ~= _directory;
+            _nextHistory.length = 0;
+            _prevButton.isEnabled = true;
+            _nextButton.isEnabled = false;
+        }
     }
 
     package void validateItem(FileItem item_) {
         _selectedItem = item_;
         _value = _selectedItem.path;
-        dispatchEvent("value", false);
+        if (!isDir(_value)) {
+            dispatchEvent("value", false);
+        }
+        else {
+            _prevHistory ~= _directory;
+            _nextHistory.length = 0;
+            _prevButton.isEnabled = true;
+            _nextButton.isEnabled = false;
+
+            _directory = _value;
+            _uriField.value = _directory;
+            _reloadDir();
+        }
     }
 
     package void selectItem(FileItem item_) {
@@ -120,8 +197,14 @@ final class FileBrowser : Modal {
         foreach (item; _items) {
             item._updateValue(item == item_);
         }
-        _validateBtn.isEnabled = true;
-        _validateBtn.addEventListener("click", &_onValidate);
+        if (!isDir(_selectedItem.path)) {
+            _validateBtn.isEnabled = true;
+            _validateBtn.addEventListener("click", &_onValidate);
+        }
+        else {
+            _validateBtn.isEnabled = false;
+            _validateBtn.removeEventListener("click", &_onValidate);
+        }
     }
 
     private void _reloadDir() {
@@ -130,7 +213,11 @@ final class FileBrowser : Modal {
         _validateBtn.isEnabled = false;
         _validateBtn.removeEventListener("click", &_onValidate);
         _selectedItem = null;
-        foreach (file; dirEntries(getcwd(), SpanMode.shallow)) {
+        string search = _searchField.value;
+        foreach (file; dirEntries(_directory, SpanMode.shallow)) {
+            if (file.indexOf(search, No.caseSentitive) == -1)
+                continue;
+
             FileItem element = new FileItem(file, this);
             _items ~= element;
             _list.addList(element);

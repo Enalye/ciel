@@ -31,6 +31,7 @@ abstract class List : UIElement {
 
     void clearList() {
         _contentView.clearUI();
+        _contentView.setContentPosition(0f);
     }
 
     private void _onSize() {

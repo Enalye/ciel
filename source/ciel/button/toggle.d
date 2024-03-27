@@ -139,6 +139,8 @@ final class ToggleButton : Button!Capsule {
         else {
             _onMouseLeave();
         }
+
+        dispatchEvent("value", false);
     }
 
     private void _onUpdate() {
