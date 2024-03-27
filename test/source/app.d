@@ -28,7 +28,7 @@ void main() {
         app.addElement(vbox);
 
         {
-            auto btn = new PrimaryButton("Primary");
+            auto btn = new AccentButton("Primary");
             vbox.addElement(btn);
             /*btn.addEventListener("mousedown", {
                 writeln("DOWN");
@@ -44,7 +44,7 @@ void main() {
             });*/
         }
         {
-            auto btn = new SecondaryButton("Secondary");
+            auto btn = new NeutralButton("Secondary");
             vbox.addElement(btn);
         }
         {

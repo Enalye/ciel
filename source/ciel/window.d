@@ -21,6 +21,8 @@ struct Theme {
     Color onAccent;
     Color onDanger;
     float corner;
+    float activeOpacity = 1f;
+    float inactiveOpacity = 0.25f;
 }
 
 final class Ciel {
@@ -77,6 +79,14 @@ final class Ciel {
 
         float getCorner() {
             return _theme.corner;
+        }
+
+        float getActiveOpacity() {
+            return _theme.activeOpacity;
+        }
+
+        float getInactiveOpacity() {
+            return _theme.inactiveOpacity;
         }
 
         Vec2f size() {

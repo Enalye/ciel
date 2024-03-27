@@ -43,16 +43,16 @@ final class Checkbox : Button!RoundedRectangle {
         _tick1.angle = 45f;
         _tick1.anchor = Vec2f(1f, 0.5f);
         _tick1.pivot = Vec2f(1f, 0.5f);
-        _tick1.isEnabled = _value;
+        _tick1.isVisible = _value;
         addImage(_tick1);
 
         _tick2 = Rectangle.fill(Vec2f(11f, 2f));
-        _tick2.position = Vec2f(10f, 16f);
+        _tick2.position = Vec2f(11f, 15f);
         _tick2.color = Ciel.getOnAccent();
         _tick2.angle = -45f;
         _tick2.anchor = Vec2f(0f, 0.5f);
         _tick2.pivot = Vec2f(0f, 0.5f);
-        _tick2.isEnabled = _value;
+        _tick2.isVisible = _value;
         addImage(_tick2);
 
         setFxColor(_value ? Ciel.getAccent() : Ciel.getNeutral());
@@ -61,6 +61,27 @@ final class Checkbox : Button!RoundedRectangle {
 
         addEventListener("mouseenter", &_onMouseEnter);
         addEventListener("mouseleave", &_onMouseLeave);
+
+        addEventListener("enable", &_onEnable);
+        addEventListener("disable", &_onDisable);
+    }
+
+    private void _onEnable() {
+        _background.alpha = Ciel.getActiveOpacity();
+        _tick1.alpha = Ciel.getActiveOpacity();
+        _tick2.alpha = Ciel.getActiveOpacity();
+
+        addEventListener("mouseenter", &_onMouseEnter);
+        addEventListener("mouseleave", &_onMouseLeave);
+    }
+
+    private void _onDisable() {
+        _background.alpha = Ciel.getInactiveOpacity();
+        _tick1.alpha = Ciel.getInactiveOpacity();
+        _tick2.alpha = Ciel.getInactiveOpacity();
+
+        removeEventListener("mouseenter", &_onMouseEnter);
+        removeEventListener("mouseleave", &_onMouseLeave);
     }
 
     private void _onMouseEnter() {
@@ -85,8 +106,8 @@ final class Checkbox : Button!RoundedRectangle {
         _value = value_;
         setFxColor(_value ? Ciel.getAccent() : Ciel.getNeutral());
 
-        _tick1.isEnabled = _value;
-        _tick2.isEnabled = _value;
+        _tick1.isVisible = _value;
+        _tick2.isVisible = _value;
         _background.filled = _value;
 
         if (isHovered) {

@@ -30,6 +30,18 @@ final class RadioGroup {
             button._updateValue(button == button_);
         }
     }
+
+    private void enable(bool isEnabled) {
+        foreach (RadioButton button; _buttons) {
+            button.isEnabled = isEnabled;
+            if (isEnabled) {
+                button._onEnable();
+            }
+            else {
+                button._onDisable();
+            }
+        }
+    }
 }
 
 final class RadioButton : Button!Circle {
@@ -61,7 +73,7 @@ final class RadioButton : Button!Circle {
         _check.position = getCenter();
         _check.anchor = Vec2f.half;
         _check.color = Ciel.getAccent();
-        _check.isEnabled = _value;
+        _check.isVisible = _value;
         addImage(_check);
 
         setFxColor(_value ? Ciel.getAccent() : Ciel.getNeutral());
@@ -70,10 +82,36 @@ final class RadioButton : Button!Circle {
 
         addEventListener("mouseenter", &_onMouseEnter);
         addEventListener("mouseleave", &_onMouseLeave);
+
+        addEventListener("enable", { _group.enable(true); });
+        addEventListener("disable", { _group.enable(false); });
     }
 
     void check() {
         _group.check(this);
+    }
+
+    private void _onEnable() {
+        _outline.alpha = Ciel.getActiveOpacity();
+        _check.alpha = Ciel.getActiveOpacity();
+
+        if (isHovered) {
+            _onMouseEnter();
+        }
+        else {
+            _onMouseLeave();
+        }
+
+        addEventListener("mouseenter", &_onMouseEnter);
+        addEventListener("mouseleave", &_onMouseLeave);
+    }
+
+    private void _onDisable() {
+        _outline.alpha = Ciel.getInactiveOpacity();
+        _check.alpha = Ciel.getInactiveOpacity();
+
+        removeEventListener("mouseenter", &_onMouseEnter);
+        removeEventListener("mouseleave", &_onMouseLeave);
     }
 
     private void _onMouseEnter() {
@@ -101,7 +139,7 @@ final class RadioButton : Button!Circle {
         _value = value_;
         setFxColor(_value ? Ciel.getAccent() : Ciel.getNeutral());
 
-        _check.isEnabled = _value;
+        _check.isVisible = _value;
 
         if (isHovered) {
             _onMouseEnter();

@@ -48,8 +48,25 @@ final class HSlider : Slider {
         addEventListener("mouseup", &_onMouseUp);
         addEventListener("update", &_onUpdate);
 
+        addEventListener("enable", &_onEnable);
+        addEventListener("disable", &_onDisable);
+
         _onSizeChange();
         _onValueChange();
+    }
+
+    private void _onEnable() {
+        _backgroundBar.alpha = Ciel.getActiveOpacity();
+        _progressBar.alpha = Ciel.getActiveOpacity();
+        _progressBar.color = Ciel.getAccent();
+        _circle.color = Ciel.getAccent();
+    }
+
+    private void _onDisable() {
+        _backgroundBar.alpha = Ciel.getInactiveOpacity();
+        _progressBar.alpha = Ciel.getInactiveOpacity();
+        _progressBar.color = Ciel.getNeutral();
+        _circle.color = Ciel.getNeutral();
     }
 
     private void _onValueChange() {

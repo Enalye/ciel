@@ -29,11 +29,22 @@ final class ControlButton : TextButton!RoundedRectangle {
         _background.color = Ciel.getNeutral();
         _background.anchor = Vec2f.zero;
         _background.alpha = .5f;
-        _background.isEnabled = false;
+        _background.isVisible = false;
         addImage(_background);
 
-        addEventListener("mouseenter", { _background.isEnabled = true; });
-        addEventListener("mouseleave", { _background.isEnabled = false; });
+        addEventListener("mouseenter", { _background.isVisible = true; });
+        addEventListener("mouseleave", { _background.isVisible = false; });
+
+        addEventListener("enable", &_onEnable);
+        addEventListener("disable", &_onDisable);
+    }
+
+    private void _onEnable() {
+        setTextColor(Ciel.getAccent());
+    }
+
+    private void _onDisable() {
+        setTextColor(Ciel.getNeutral());
     }
 }
 
@@ -85,6 +96,15 @@ final class NumberField : UIElement {
         _incrementBtn.addEventListener("click", { value(_value + _step); });
         _decrementBtn.addEventListener("click", { value(_value - _step); });
         _textField.addEventListener("input", &_onInput);
+
+        addEventListener("enable", &_onEnableChange);
+        addEventListener("disable", &_onEnableChange);
+    }
+
+    private void _onEnableChange() {
+        _textField.isEnabled = isEnabled;
+        _decrementBtn.isEnabled = isEnabled;
+        _incrementBtn.isEnabled = isEnabled;
     }
 
     void setRange(float minValue, float maxValue) {
@@ -151,6 +171,15 @@ final class IntegerField : UIElement {
         _incrementBtn.addEventListener("click", { value(_value + _step); });
         _decrementBtn.addEventListener("click", { value(_value - _step); });
         _textField.addEventListener("input", &_onInput);
+
+        addEventListener("enable", &_onEnableChange);
+        addEventListener("disable", &_onEnableChange);
+    }
+
+    private void _onEnableChange() {
+        _textField.isEnabled = isEnabled;
+        _decrementBtn.isEnabled = isEnabled;
+        _incrementBtn.isEnabled = isEnabled;
     }
 
     void setRange(int minValue, int maxValue) {

@@ -71,6 +71,37 @@ final class ToggleButton : Button!Capsule {
 
         addEventListener("mouseenter", &_onMouseEnter);
         addEventListener("mouseleave", &_onMouseLeave);
+
+        addEventListener("enable", &_onEnable);
+        addEventListener("disable", &_onDisable);
+    }
+
+    private void _onEnable() {
+        _background.alpha = Ciel.getActiveOpacity();
+        _selection.alpha = Ciel.getActiveOpacity();
+
+        _activeLabel.color = _value ? Ciel.getAccent() : Ciel.getOnAccent();
+        _inactiveLabel.color = _value ? Ciel.getOnAccent() : Ciel.getNeutral();
+
+        if (isHovered) {
+            _onMouseEnter();
+        }
+        else {
+            _onMouseLeave();
+        }
+
+        addEventListener("mouseenter", &_onMouseEnter);
+        addEventListener("mouseleave", &_onMouseLeave);
+    }
+
+    private void _onDisable() {
+        _background.alpha = Ciel.getInactiveOpacity();
+        _selection.alpha = Ciel.getInactiveOpacity();
+        _inactiveLabel.color = Ciel.getNeutral();
+        _activeLabel.color = Ciel.getNeutral();
+
+        removeEventListener("mouseenter", &_onMouseEnter);
+        removeEventListener("mouseleave", &_onMouseLeave);
     }
 
     private void _onMouseEnter() {

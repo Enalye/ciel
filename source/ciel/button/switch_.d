@@ -51,6 +51,32 @@ final class SwitchButton : Button!Capsule {
 
         addEventListener("mouseenter", &_onMouseEnter);
         addEventListener("mouseleave", &_onMouseLeave);
+
+        addEventListener("enable", &_onEnable);
+        addEventListener("disable", &_onDisable);
+    }
+
+    private void _onEnable() {
+        _background.alpha = Ciel.getActiveOpacity();
+        _circle.alpha = Ciel.getActiveOpacity();
+
+        if (isHovered) {
+            _onMouseEnter();
+        }
+        else {
+            _onMouseLeave();
+        }
+
+        addEventListener("mouseenter", &_onMouseEnter);
+        addEventListener("mouseleave", &_onMouseLeave);
+    }
+
+    private void _onDisable() {
+        _background.alpha = Ciel.getInactiveOpacity();
+        _circle.alpha = Ciel.getInactiveOpacity();
+
+        removeEventListener("mouseenter", &_onMouseEnter);
+        removeEventListener("mouseleave", &_onMouseLeave);
     }
 
     private void _onMouseEnter() {

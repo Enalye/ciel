@@ -26,13 +26,39 @@ final class OutlinedButton : TextButton!RoundedRectangle {
         _background.thickness = 2f;
         addImage(_background);
 
-        addEventListener("mouseenter", {
-            setTextColor(Ciel.getOnAccent());
-            _background.filled = true;
-        });
-        addEventListener("mouseleave", {
-            setTextColor(Ciel.getAccent());
-            _background.filled = false;
-        });
+        addEventListener("mouseenter", &_onMouseEnter);
+        addEventListener("mouseleave", &_onMouseLeave);
+
+        addEventListener("enable", &_onEnable);
+        addEventListener("disable", &_onDisable);
+    }
+
+    private void _onEnable() {
+        _background.alpha = Ciel.getActiveOpacity();
+        _background.color = Ciel.getAccent();
+        setTextColor(Ciel.getAccent());
+
+        addEventListener("mouseenter", &_onMouseEnter);
+        addEventListener("mouseleave", &_onMouseLeave);
+    }
+
+    private void _onDisable() {
+        _background.filled = false;
+        _background.alpha = Ciel.getInactiveOpacity();
+        _background.color = Ciel.getNeutral();
+        setTextColor(Ciel.getNeutral());
+
+        removeEventListener("mouseenter", &_onMouseEnter);
+        removeEventListener("mouseleave", &_onMouseLeave);
+    }
+
+    private void _onMouseEnter() {
+        setTextColor(Ciel.getOnAccent());
+        _background.filled = true;
+    }
+
+    private void _onMouseLeave() {
+        setTextColor(Ciel.getAccent());
+        _background.filled = false;
     }
 }

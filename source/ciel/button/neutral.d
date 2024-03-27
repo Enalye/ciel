@@ -3,13 +3,13 @@
  * License: Zlib
  * Authors: Enalye
  */
-module ciel.button.danger;
+module ciel.button.neutral;
 
 import etabli;
 import ciel.window;
 import ciel.button.button;
 
-final class DangerButton : TextButton!RoundedRectangle {
+final class NeutralButton : TextButton!RoundedRectangle {
     private {
         RoundedRectangle _background;
     }
@@ -17,11 +17,11 @@ final class DangerButton : TextButton!RoundedRectangle {
     this(string text_) {
         super(text_);
 
-        setFxColor(Ciel.getDanger());
-        setTextColor(Ciel.getOnDanger());
+        setFxColor(Ciel.getNeutral());
+        setTextColor(Ciel.getOnNeutral());
 
         _background = RoundedRectangle.fill(getSize(), Ciel.getCorner());
-        _background.color = Ciel.getDanger();
+        _background.color = Ciel.getNeutral();
         _background.anchor = Vec2f.zero;
         addImage(_background);
 
@@ -34,7 +34,8 @@ final class DangerButton : TextButton!RoundedRectangle {
 
     private void _onEnable() {
         _background.alpha = Ciel.getActiveOpacity();
-        setTextColor(Ciel.getOnDanger());
+        _background.color = Ciel.getNeutral();
+        setTextColor(Ciel.getOnNeutral());
 
         addEventListener("mouseenter", &_onMouseEnter);
         addEventListener("mouseleave", &_onMouseLeave);
@@ -42,6 +43,7 @@ final class DangerButton : TextButton!RoundedRectangle {
 
     private void _onDisable() {
         _background.alpha = Ciel.getInactiveOpacity();
+        _background.color = Ciel.getNeutral();
         setTextColor(Ciel.getNeutral());
 
         removeEventListener("mouseenter", &_onMouseEnter);
@@ -49,13 +51,13 @@ final class DangerButton : TextButton!RoundedRectangle {
     }
 
     private void _onMouseEnter() {
-        Color rgb = Ciel.getDanger();
+        Color rgb = Ciel.getNeutral();
         HSLColor hsl = HSLColor.fromColor(rgb);
         hsl.l = hsl.l * .8f;
         _background.color = hsl.toColor();
     }
 
     private void _onMouseLeave() {
-        _background.color = Ciel.getDanger();
+        _background.color = Ciel.getNeutral();
     }
 }

@@ -3,13 +3,13 @@
  * License: Zlib
  * Authors: Enalye
  */
-module ciel.button.danger;
+module ciel.button.accent;
 
 import etabli;
 import ciel.window;
 import ciel.button.button;
 
-final class DangerButton : TextButton!RoundedRectangle {
+final class AccentButton : TextButton!RoundedRectangle {
     private {
         RoundedRectangle _background;
     }
@@ -17,11 +17,11 @@ final class DangerButton : TextButton!RoundedRectangle {
     this(string text_) {
         super(text_);
 
-        setFxColor(Ciel.getDanger());
-        setTextColor(Ciel.getOnDanger());
+        setFxColor(Ciel.getAccent());
+        setTextColor(Ciel.getOnAccent());
 
         _background = RoundedRectangle.fill(getSize(), Ciel.getCorner());
-        _background.color = Ciel.getDanger();
+        _background.color = Ciel.getAccent();
         _background.anchor = Vec2f.zero;
         addImage(_background);
 
@@ -34,7 +34,7 @@ final class DangerButton : TextButton!RoundedRectangle {
 
     private void _onEnable() {
         _background.alpha = Ciel.getActiveOpacity();
-        setTextColor(Ciel.getOnDanger());
+        setTextColor(Ciel.getOnAccent());
 
         addEventListener("mouseenter", &_onMouseEnter);
         addEventListener("mouseleave", &_onMouseLeave);
@@ -49,13 +49,13 @@ final class DangerButton : TextButton!RoundedRectangle {
     }
 
     private void _onMouseEnter() {
-        Color rgb = Ciel.getDanger();
+        Color rgb = Ciel.getAccent();
         HSLColor hsl = HSLColor.fromColor(rgb);
         hsl.l = hsl.l * .8f;
         _background.color = hsl.toColor();
     }
 
     private void _onMouseLeave() {
-        _background.color = Ciel.getDanger();
+        _background.color = Ciel.getAccent();
     }
 }

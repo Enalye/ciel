@@ -30,15 +30,15 @@ final class MenuButton : TextButton!RoundedRectangle {
         _background.color = Ciel.getNeutral();
         _background.anchor = Vec2f.zero;
         _background.alpha = .5f;
-        _background.isEnabled = false;
+        _background.isVisible = false;
         addImage(_background);
 
         addEventListener("mouseenter", {
-            _background.isEnabled = true;
+            _background.isVisible = true;
             _bar.switchMenu(_id);
         });
         addEventListener("mouseleave", {
-            _background.isEnabled = false;
+            _background.isVisible = false;
             _bar.leaveMenu(_id);
         });
         addEventListener("click", { _bar.toggleMenu(_id); });

@@ -19,8 +19,6 @@ abstract class Button(ImageType) : UIElement {
 
         _fx = new ButtonFx!ImageType(this);
 
-        addEventListener("enable", { alpha = 1f; });
-        addEventListener("disable", { alpha = 0.12f; });
         addEventListener("press", { _fx.onClick(getMousePosition()); });
         addEventListener("unpress", { _fx.onUnclick(); });
         addEventListener("mousemove", { _fx.onUpdate(getMousePosition()); });

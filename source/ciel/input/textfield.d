@@ -83,13 +83,13 @@ final class TextField : UIElement {
         _selection.anchor = Vec2f(0f, 0.5f);
         _selection.color = Ciel.getAccent();
         _selection.alpha = 0.5f;
-        _selection.isEnabled = false;
+        _selection.isVisible = false;
         _textContainer.addImage(_selection);
 
         _caret = Rectangle.fill(Vec2f(1f, Ciel.getFont().size()));
         _caret.anchor = Vec2f.half;
         _caret.color = Ciel.getOnNeutral();
-        _caret.isEnabled = false;
+        _caret.isVisible = false;
         _caret.alpha = 0f;
         _textContainer.addImage(_caret);
 
@@ -107,8 +107,22 @@ final class TextField : UIElement {
         addEventListener("blur", &_onBlur);
         addEventListener("update", &_onUpdate);
         addEventListener("size", &_onSize);
+        addEventListener("enable", &_onEnable);
+        addEventListener("disable", &_onDisable);
 
         _onSelectionChange();
+    }
+
+    private void _onEnable() {
+        _background.alpha = Ciel.getActiveOpacity();
+        _outline.alpha = Ciel.getActiveOpacity();
+        _label.color = Ciel.getOnNeutral();
+    }
+
+    private void _onDisable() {
+        _background.alpha = Ciel.getInactiveOpacity();
+        _outline.alpha = Ciel.getInactiveOpacity();
+        _label.color = Ciel.getNeutral();
     }
 
     private void _onSize() {
@@ -147,15 +161,15 @@ final class TextField : UIElement {
     private void _onFocus() {
         addEventListener("update", &_onFocusUpdate);
         _timer.start(60);
-        _caret.isEnabled = true;
+        _caret.isVisible = true;
         _outline.color = Ciel.getAccent();
     }
 
     private void _onBlur() {
         removeEventListener("update", &_onFocusUpdate);
         _timer.stop();
-        _caret.isEnabled = false;
-        _selection.isEnabled = false;
+        _caret.isVisible = false;
+        _selection.isVisible = false;
         _outline.color = Ciel.getNeutral();
         _updateMouseMove = false;
         _selectionIndex = _caretIndex;
@@ -200,7 +214,7 @@ final class TextField : UIElement {
         }
 
         if (_caretIndex != _selectionIndex) {
-            _selection.isEnabled = true;
+            _selection.isVisible = true;
 
             Vec2f selectionPosition = Vec2f(_label.getPosition().x + _label.getTextSize(0,
                     _selectionIndex).x, _textContainer.getHeight() / 2f);
@@ -211,7 +225,7 @@ final class TextField : UIElement {
             _selection.size = Vec2f(selectionSize, _label.getHeight());
         }
         else {
-            _selection.isEnabled = false;
+            _selection.isVisible = false;
         }
     }
 
