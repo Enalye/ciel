@@ -34,10 +34,15 @@ final class TextField : UIElement {
         }
 
         string value(string text_) {
-            _text = to!dstring(text_);
+            dstring newText = to!dstring(text_);
+            if (newText == _text)
+                return text_;
+
+            _text = newText;
             _caretIndex = to!uint(_text.length);
             _selectionIndex = _caretIndex;
             _label.text = text_;
+            dispatchEvent("value", false);
             return text_;
         }
 
@@ -59,6 +64,7 @@ final class TextField : UIElement {
 
     this() {
         setSize(Vec2f(150f, 32f));
+        setSizeLock(false, true);
         focusable = true;
         _timer.mode = Timer.Mode.bounce;
 

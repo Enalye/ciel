@@ -3,7 +3,7 @@
  * License: Zlib
  * Authors: Enalye
  */
-module ciel.file.browser;
+module ciel.file.save;
 
 import std.file;
 import std.path;
@@ -15,31 +15,34 @@ import ciel.input;
 import ciel.panel;
 import ciel.window;
 import ciel.navigation;
+import ciel.select;
 
-final class FileBrowser : Modal {
+final class SaveFile : Modal {
     private {
         PathField _uriField;
-        TextField _searchField;
+        TextField _fileNameField;
         VList _list;
         FileItem[] _items;
         FileItem _selectedItem;
         UIElement _validateBtn;
         string _directory, _value;
-
+        string[] _extensions;
         GhostButton _prevButton, _nextButton;
         string[] _prevHistory, _nextHistory;
+        SelectButton _extensionSelect;
     }
 
     @property {
         string value() const {
-            return _value;
+            return buildNormalizedPath(_directory, _value);
         }
     }
 
-    this() {
+    this(string directory, string[] extensions = []) {
         setSize(Vec2f(700f, 500f));
 
-        _directory = getcwd();
+        _directory = directory;
+        _extensions = extensions;
 
         GhostButton exitBtn = new GhostButton("X");
         exitBtn.setAlign(UIAlignX.right, UIAlignY.top);
@@ -74,21 +77,26 @@ final class FileBrowser : Modal {
         headerBox.addUI(_uriField);
 
         {
-            HBox searchBox = new HBox;
-            searchBox.setAlign(UIAlignX.left, UIAlignY.bottom);
-            searchBox.setPosition(Vec2f(16f, 8f));
-            searchBox.setSpacing(8f);
-            addUI(searchBox);
+            HBox fileNameBox = new HBox;
+            fileNameBox.setAlign(UIAlignX.left, UIAlignY.bottom);
+            fileNameBox.setPosition(Vec2f(16f, 8f));
+            fileNameBox.setSpacing(8f);
+            addUI(fileNameBox);
 
-            Label searchLabel = new Label("Rechercher:", Ciel.getFont());
-            searchLabel.color = Ciel.getOnNeutral();
-            searchBox.addUI(searchLabel);
+            Label fileNameLabel = new Label("Nom du fichier:", Ciel.getFont());
+            fileNameLabel.color = Ciel.getOnNeutral();
+            fileNameBox.addUI(fileNameLabel);
 
-            _searchField = new TextField;
-            _searchField.setAlign(UIAlignX.left, UIAlignY.top);
-            _searchField.setSize(Vec2f(250f, _uriField.getHeight()));
-            _searchField.addEventListener("value", &_reloadDir);
-            searchBox.addUI(_searchField);
+            _fileNameField = new TextField;
+            _fileNameField.setAlign(UIAlignX.left, UIAlignY.top);
+            _fileNameField.setSize(Vec2f(200f, _uriField.getHeight()));
+            _fileNameField.addEventListener("value", &_onFileName);
+            fileNameBox.addUI(_fileNameField);
+
+            if (_extensions.length) {
+                _extensionSelect = new SelectButton(_extensions, _extensions[0]);
+                fileNameBox.addUI(_extensionSelect);
+            }
         }
 
         HBox footerBox = new HBox;
@@ -101,8 +109,9 @@ final class FileBrowser : Modal {
         cancelBtn.addEventListener("click", &remove);
         footerBox.addUI(cancelBtn);
 
-        _validateBtn = new AccentButton("Ouvrir");
+        _validateBtn = new AccentButton("Enregistrer");
         _validateBtn.isEnabled = false;
+        _validateBtn.addEventListener("click", &_onValidate);
         footerBox.addUI(_validateBtn);
 
         _list = new VList;
@@ -158,6 +167,10 @@ final class FileBrowser : Modal {
         }
     }
 
+    private void _onFileName() {
+        _validateBtn.isEnabled = _fileNameField.value.length > 0;
+    }
+
     private void _onValidate() {
         if (!_selectedItem)
             return;
@@ -198,25 +211,27 @@ final class FileBrowser : Modal {
             item._updateValue(item == item_);
         }
         if (!isDir(_selectedItem.path)) {
-            _validateBtn.isEnabled = true;
-            _validateBtn.addEventListener("click", &_onValidate);
-        }
-        else {
-            _validateBtn.isEnabled = false;
-            _validateBtn.removeEventListener("click", &_onValidate);
+            _fileNameField.value = _selectedItem.name;
         }
     }
 
     private void _reloadDir() {
         _value = "";
         _list.clearList();
-        _validateBtn.isEnabled = false;
-        _validateBtn.removeEventListener("click", &_onValidate);
         _selectedItem = null;
-        string search = _searchField.value;
         foreach (file; dirEntries(_directory, SpanMode.shallow)) {
-            if (file.indexOf(search, No.caseSentitive) == -1)
-                continue;
+            if (!file.isDir && _extensions.length) {
+                string fileExt = extension(file);
+                bool isValid;
+                foreach (ext; _extensions) {
+                    if (icmp(fileExt, ext) == 0) {
+                        isValid = true;
+                        break;
+                    }
+                }
+                if (!isValid)
+                    continue;
+            }
 
             FileItem element = new FileItem(file, this);
             _items ~= element;
@@ -229,19 +244,24 @@ private final class FileItem : UIElement {
     private {
         Rectangle _rectangle;
         Label _label;
-        FileBrowser _browser;
+        SaveFile _browser;
         bool _isSelected;
-        string _path;
+        string _path, _name;
     }
 
     @property {
         string path() const {
             return _path;
         }
+
+        string name() const {
+            return _name;
+        }
     }
 
-    this(string path_, FileBrowser browser) {
+    this(string path_, SaveFile browser) {
         _path = path_;
+        _name = baseName(_path);
         _browser = browser;
         setSize(Vec2f(getParentWidth() - 9f, 32f));
 
@@ -251,7 +271,7 @@ private final class FileItem : UIElement {
         _rectangle.isVisible = false;
         addImage(_rectangle);
 
-        _label = new Label(baseName(_path), Ciel.getFont());
+        _label = new Label(_name, Ciel.getFont());
         _label.setAlign(UIAlignX.left, UIAlignY.center);
         _label.setPosition(Vec2f(8f, 0f));
         _label.color = Ciel.getOnNeutral();

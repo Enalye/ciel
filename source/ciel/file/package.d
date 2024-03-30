@@ -6,5 +6,7 @@
 module ciel.file;
 
 public {
-    import ciel.file.browser;
+    import ciel.file.browsedir;
+    import ciel.file.load;
+    import ciel.file.save;
 }

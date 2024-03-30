@@ -35,6 +35,8 @@ package final class SelectList : UIElement {
 
         addEventListener("size", &_onSizeChange);
         addEventListener("clickoutside", { _button.removeMenu(); });
+        addEventListener("register", &_onRegister);
+        addEventListener("unregister", &_onUnregister);
 
         State hiddenState = new State("hidden");
         hiddenState.scale = Vec2f(1f, 0.5f);
@@ -49,6 +51,18 @@ package final class SelectList : UIElement {
 
         setState("hidden");
         runState("visible");
+    }
+
+    private void _onRegister() {
+        addEventListener("update", &_updatePosition);
+    }
+
+    private void _onUnregister() {
+        addEventListener("update", &_updatePosition);
+    }
+
+    private void _updatePosition() {
+        setPosition(_button.getAbsolutePosition() + Vec2f(0f, _button.getHeight() + 4f));
     }
 
     private void _onSizeChange() {

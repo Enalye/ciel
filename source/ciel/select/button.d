@@ -19,6 +19,7 @@ final class SelectButton : Button!RoundedRectangle {
         string[] _items;
         string _value;
         Label _label;
+        Color _buttonColor;
     }
 
     @property {
@@ -35,8 +36,9 @@ final class SelectButton : Button!RoundedRectangle {
         }
     }
 
-    this(string[] items, string defaultItem) {
+    this(string[] items, string defaultItem, bool isAccent = false) {
         _items = items;
+        _buttonColor = isAccent ? Ciel.getAccent() : Ciel.getNeutral();
 
         Vec2f size = Vec2f.zero;
 
@@ -58,20 +60,20 @@ final class SelectButton : Button!RoundedRectangle {
             _value = _items[0];
         value(defaultItem);
 
-        setFxColor(Ciel.getAccent());
+        setFxColor(_buttonColor);
 
         _background = RoundedRectangle.fill(getSize(), Ciel.getCorner());
-        _background.color = Ciel.getAccent();
+        _background.color = _buttonColor;
         _background.anchor = Vec2f.zero;
         addImage(_background);
 
         addEventListener("mouseenter", {
-            Color rgb = Ciel.getAccent();
+            Color rgb = _buttonColor;
             HSLColor hsl = HSLColor.fromColor(rgb);
             hsl.l = hsl.l * .8f;
             _background.color = hsl.toColor();
         });
-        addEventListener("mouseleave", { _background.color = Ciel.getAccent(); });
+        addEventListener("mouseleave", { _background.color = _buttonColor; });
         addEventListener("click", &_onClick);
     }
 
@@ -89,24 +91,7 @@ final class SelectButton : Button!RoundedRectangle {
     }
 
     package void displayMenu() {
-        _list.setAlign(getAlignX(), getAlignY());
-        final switch (getAlignY()) with (UIAlignY) {
-        case top:
-        case bottom:
-            _list.setPosition(getPosition() + Vec2f(0f, getHeight() + 4f));
-            break;
-        case center:
-            _list.setPosition(getPosition() + Vec2f(0f, (getHeight() + _list.getHeight()) / 2f + 4f));
-            break;
-        }
         _list.runState("visible");
-
-        UIElement parent = getParent();
-        if (parent) {
-            parent.addUI(_list);
-        }
-        else {
-            Ciel.addUI(_list);
-        }
+        Ciel.addUI(_list);
     }
 }
